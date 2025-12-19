@@ -5,3 +5,4 @@ github pages site
 
 [SciFiSquad](SciFiSquad/SciFiSquad.html)
 
+[BoardGameClient](board-game-client/index.html)
