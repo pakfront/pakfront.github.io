@@ -1,3 +1,0 @@
-Build Time: Sat, Dec 20, 2025  8:37:11 AM
-Git Branch: feature/claude-webrtc
-Git Hash: c173cae

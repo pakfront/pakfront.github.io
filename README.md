@@ -1,10 +1,26 @@
-# pakfront.github.io
-github pages site
+# 🌟 Pakfront.github.io
 
-[WASM-test](wasm-test/wasm-test.html)
+Welcome to my GitHub Pages site! This repository hosts various web-based projects and demos, including interactive games and WebAssembly experiments.
 
-[SciFiSquad](SciFiSquad/SciFiSquad.html)
+## 🎮 Projects
 
-[BoardGameClient](board-game-client/index.html)
+### [Board Game Client](board-game-client/index.html)
+![Board Game Client Screenshot](board-game-client/index.png)
+An interactive board game client built with HTML5.
 
-2025-12-19 14:45:46
+### [Pong Demo](pong-demo/index.html)
+![Pong Demo Screenshot](pong-demo/index.png)
+A classic Pong game demo.
+
+### [SciFi Squad](SciFiSquad/SciFiSquad.html)
+![SciFi Squad Screenshot](SciFiSquad/SciFiSquad.png)
+A sci-fi themed game experience.
+
+### [WASM Test](wasm-test/wasm-test.html)
+![WASM Test Screenshot](wasm-test/wasm-test.png)
+Testing WebAssembly capabilities.
+
+## 🚀 About
+This site showcases web technologies and game development experiments.
+
+*Last updated: 2025-12-19 14:45:46*
