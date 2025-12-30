@@ -12,8 +12,8 @@ An interactive board game client built with HTML5.
 ![Pong Demo Screenshot](pong-demo/index.png)
 A classic Pong game demo.
 
-### [SciFi Squad](SciFiSquad/SciFiSquad.html)
-![SciFi Squad Screenshot](SciFiSquad/SciFiSquad.png)
+### [SciFi Squad](SciFiSquad/index.html)
+![SciFi Squad Screenshot](SciFiSquad/index.png)
 A sci-fi themed game experience.
 
 ### [WASM Test](wasm-test/wasm-test.html)
