@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Army Commander Dev UI</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+<link rel="modulepreload" href="/dev-ui-3900002f141c3e1a.js" crossorigin="anonymous" integrity="sha384-B0Wb+298ebw3j/PpL+VtHtl9G54KgByFT3SwL9LiSWEBoHDmQSA2M32fWY5wRPIH"><link rel="preload" href="/dev-ui-3900002f141c3e1a_bg.wasm" crossorigin="anonymous" integrity="sha384-C/xLgPdny/NoCDIzA1/GHdYcjNFIuRw5zzFmoeci6PLiz3IyZoJChH4Dclbm24us" as="fetch" type="application/wasm"></head>
+<body>
+    <canvas id="canvas"></canvas>
+
+<script type="module">
+import init, * as bindings from '/dev-ui-3900002f141c3e1a.js';
+const wasm = await init({ module_or_path: '/dev-ui-3900002f141c3e1a_bg.wasm' });
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script></body>
+</html>

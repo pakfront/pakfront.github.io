@@ -20,6 +20,11 @@ A sci-fi themed game experience.
 ![WASM Test Screenshot](wasm-test/wasm-test.png)
 Testing WebAssembly capabilities.
 
+### [Army Commander](army-commander/index.html)
+![Wego ACW Brigade Game](army-commander/index.png)
+Rust built test
+
+
 ## 🚀 About
 This site showcases web technologies and game development experiments.
 
