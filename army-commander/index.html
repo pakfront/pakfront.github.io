@@ -24,8 +24,8 @@
     <canvas id="canvas"></canvas>
 
 <script type="module">
-import init, * as bindings from '/dev-ui-3900002f141c3e1a.js';
-const wasm = await init({ module_or_path: '/dev-ui-3900002f141c3e1a_bg.wasm' });
+import init, * as bindings from './dev-ui-3900002f141c3e1a.js';
+const wasm = await init({ module_or_path: './dev-ui-3900002f141c3e1a_bg.wasm' });
 
 
 window.wasmBindings = bindings;
