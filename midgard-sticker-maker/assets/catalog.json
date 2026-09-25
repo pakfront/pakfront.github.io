@@ -1,0 +1,1807 @@
+{
+  "schema_version": 2,
+  "id": "midgard-project",
+  "eras": [
+    {
+      "id": "wars-of-the-roses",
+      "title": "Wars of the Roses"
+    },
+    {
+      "id": "war-of-the-ring",
+      "title": "War of the Ring"
+    }
+  ],
+  "factions": [
+    {
+      "id": "barons-red",
+      "era_id": "wars-of-the-roses",
+      "title": "Barons \u00b7 Red"
+    },
+    {
+      "id": "barons-blue",
+      "era_id": "wars-of-the-roses",
+      "title": "Barons \u00b7 Blue"
+    },
+    {
+      "id": "orcs",
+      "era_id": "war-of-the-ring",
+      "title": "Orcs"
+    },
+    {
+      "id": "goblins",
+      "era_id": "war-of-the-ring",
+      "title": "Goblins"
+    },
+    {
+      "id": "rohan",
+      "era_id": "war-of-the-ring",
+      "title": "Riders of Rohan"
+    },
+    {
+      "id": "gondor",
+      "era_id": "war-of-the-ring",
+      "title": "Men of Gondor"
+    },
+    {
+      "id": "high-elves",
+      "era_id": "war-of-the-ring",
+      "title": "High Elves"
+    },
+    {
+      "id": "silvan-elves",
+      "era_id": "war-of-the-ring",
+      "title": "Silvan Elves"
+    },
+    {
+      "id": "ents",
+      "era_id": "war-of-the-ring",
+      "title": "Ents"
+    },
+    {
+      "id": "haradrim",
+      "era_id": "war-of-the-ring",
+      "title": "Haradrim"
+    },
+    {
+      "id": "easterlings",
+      "era_id": "war-of-the-ring",
+      "title": "Easterlings"
+    }
+  ],
+  "artwork": [
+    {
+      "id": "crimson-spear-figures",
+      "faction_id": "barons-red",
+      "title": "Crimson spear levy",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "rows": 2,
+        "columns": 7,
+        "scale": 1,
+        "jitter": 0.06,
+        "rotation": 4
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/spearman-01.png",
+          "height_mm": 6.5753,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 292,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/spearman-02.png",
+          "height_mm": 6.4646,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 297,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "3",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/spearman-03.png",
+          "height_mm": 6.5979,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 291,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "crimson-knight-figures",
+      "faction_id": "barons-red",
+      "title": "Crimson mounted knights",
+      "entity_kind": "unit",
+      "suggested_type": "heavy_riders",
+      "mode": "figures",
+      "formation_defaults": {
+        "rows": 2,
+        "columns": 4,
+        "scale": 1,
+        "jitter": 0.08,
+        "rotation": 4
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/knight-01.png",
+          "height_mm": 10.2128,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 188,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "crimson-leader-figures",
+      "faction_id": "barons-red",
+      "title": "Crimson foot baron",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/leader-01.png",
+          "height_mm": 6.443,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 298,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "crimson-longbowman-figures",
+      "faction_id": "barons-red",
+      "title": "Crimson longbowmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 5,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/longbowman-01.png",
+          "height_mm": 8.4956,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 226,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/longbowman-02.png",
+          "height_mm": 7.68,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 250,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "crimson-crossbowman-figures",
+      "faction_id": "barons-red",
+      "title": "Crimson crossbowmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 6,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/crossbowman-01.png",
+          "height_mm": 6.6207,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 290,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/crossbowman-02.png",
+          "height_mm": 6.8571,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 280,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "crimson-halberdier-figures",
+      "faction_id": "barons-red",
+      "title": "Crimson halberdiers",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 6,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/halberdier-01.png",
+          "height_mm": 7.7419,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 248,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/halberdier-02.png",
+          "height_mm": 7.7419,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 248,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "crimson-foot-knight-figures",
+      "faction_id": "barons-red",
+      "title": "Crimson foot knights",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 6,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/foot-knight-01.png",
+          "height_mm": 7.5591,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 254,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/foot-knight-02.png",
+          "height_mm": 7.3846,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 260,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "crimson-foot-sergeant-figures",
+      "faction_id": "barons-red",
+      "title": "Crimson foot sergeants",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 6,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/foot-sergeant-01.png",
+          "height_mm": 7.8689,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 244,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/foot-sergeant-02.png",
+          "height_mm": 7.8689,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 244,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "crimson-mounted-sergeant-figures",
+      "faction_id": "barons-red",
+      "title": "Crimson mounted sergeants",
+      "entity_kind": "unit",
+      "suggested_type": "light_riders",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 3,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/mounted-sergeant-01.png",
+          "height_mm": 14.5455,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 132,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/mounted-sergeant-02.png",
+          "height_mm": 14.5455,
+          "calibration": {
+            "feature": "helmet width",
+            "pixels": 132,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "barons-red-crossbowmen",
+      "faction_id": "barons-red",
+      "title": "Crossbowmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-red/crossbowmen-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-red-foot-sergeants",
+      "faction_id": "barons-red",
+      "title": "Foot Sergeants",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-red/foot-sergeants-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-red-heavy-knights",
+      "faction_id": "barons-red",
+      "title": "Heavy Knights",
+      "entity_kind": "unit",
+      "suggested_type": "heavy_riders",
+      "base_category": "mounted",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-red/heavy-knights-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-red-longbowmen",
+      "faction_id": "barons-red",
+      "title": "Longbowmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-red/longbowmen-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-red-mounted-baron-hero",
+      "faction_id": "barons-red",
+      "title": "Mounted Baron Hero",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "base_category": "hero",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-red/mounted-baron-hero-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-red-spearmen",
+      "faction_id": "barons-red",
+      "title": "Spearmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-red/spearmen-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-blue-crossbowmen",
+      "faction_id": "barons-blue",
+      "title": "Crossbowmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-blue/crossbowmen-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-blue-foot-sergeants",
+      "faction_id": "barons-blue",
+      "title": "Foot Sergeants",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-blue/foot-sergeants-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-blue-heavy-knights",
+      "faction_id": "barons-blue",
+      "title": "Heavy Knights",
+      "entity_kind": "unit",
+      "suggested_type": "heavy_riders",
+      "base_category": "mounted",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-blue/heavy-knights-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-blue-longbowmen",
+      "faction_id": "barons-blue",
+      "title": "Longbowmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-blue/longbowmen-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-blue-mounted-baron-hero",
+      "faction_id": "barons-blue",
+      "title": "Mounted Baron Hero",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "base_category": "hero",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-blue/mounted-baron-hero-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "barons-blue-spearmen",
+      "faction_id": "barons-blue",
+      "title": "Spearmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/wars-of-the-roses/barons-blue/spearmen-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "orcs-goblin-archers",
+      "faction_id": "orcs",
+      "title": "Goblin Archers",
+      "entity_kind": "unit",
+      "suggested_type": "skirmishers",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/war-of-the-ring/orcs/goblin-archers-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "orcs-orc-goblin-archers",
+      "faction_id": "orcs",
+      "title": "Orc Goblin Archers",
+      "entity_kind": "unit",
+      "suggested_type": "skirmishers",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/war-of-the-ring/orcs/orc-goblin-archers-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "orcs-orc-spearmen",
+      "faction_id": "orcs",
+      "title": "Orc Spearmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "base_category": "foot",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/war-of-the-ring/orcs/orc-spearmen-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "orcs-troll",
+      "faction_id": "orcs",
+      "title": "Troll",
+      "entity_kind": "unit",
+      "suggested_type": "monstrosities",
+      "base_category": "monster",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/war-of-the-ring/orcs/troll-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "orcs-wolf-riders",
+      "faction_id": "orcs",
+      "title": "Wolf Riders",
+      "entity_kind": "unit",
+      "suggested_type": "light_riders",
+      "base_category": "mounted",
+      "variants": [
+        {
+          "id": "01",
+          "path": "assets/artwork/units/war-of-the-ring/orcs/wolf-riders-01.png"
+        }
+      ],
+      "mode": "unit"
+    },
+    {
+      "id": "orcs-spear-figures",
+      "faction_id": "orcs",
+      "title": "Orc spear warriors",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 5,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/orcs/warrior-01.png",
+          "height_mm": 10.4727,
+          "calibration": {
+            "feature": "head or helmet width excluding ears and crest",
+            "pixels": 220,
+            "mm": 1.5
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/orcs/warrior-02.png",
+          "height_mm": 9.6,
+          "calibration": {
+            "feature": "head or helmet width excluding ears and crest",
+            "pixels": 240,
+            "mm": 1.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "orcs-boar-rider-figures",
+      "faction_id": "orcs",
+      "title": "Orc boar riders",
+      "entity_kind": "unit",
+      "suggested_type": "heavy_riders",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 4,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/orcs/boar-rider-02.png",
+          "height_mm": 10.9714,
+          "calibration": {
+            "feature": "head or helmet width excluding ears and crest",
+            "pixels": 210,
+            "mm": 1.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "orcs-chieftain-figures",
+      "faction_id": "orcs",
+      "title": "Orc chieftain",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/orcs/chieftain-01.png",
+          "height_mm": 10.0174,
+          "calibration": {
+            "feature": "head or helmet width excluding ears and crest",
+            "pixels": 230,
+            "mm": 1.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "goblins-archer-figures",
+      "faction_id": "goblins",
+      "title": "Goblin archers",
+      "entity_kind": "unit",
+      "suggested_type": "skirmishers",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 7,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/goblins/archer-01.png",
+          "height_mm": 5.8826,
+          "calibration": {
+            "feature": "head or helmet width excluding ears and crest",
+            "pixels": 235,
+            "mm": 0.9
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/goblins/archer-02.png",
+          "height_mm": 6.912,
+          "calibration": {
+            "feature": "head or helmet width excluding ears and crest",
+            "pixels": 200,
+            "mm": 0.9
+          }
+        }
+      ]
+    },
+    {
+      "id": "goblins-wolf-rider-figures",
+      "faction_id": "goblins",
+      "title": "Goblin wolf riders",
+      "entity_kind": "unit",
+      "suggested_type": "light_riders",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 4,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/goblins/wolf-rider-01.png",
+          "height_mm": 11.52,
+          "calibration": {
+            "feature": "head or helmet width excluding ears and crest",
+            "pixels": 120,
+            "mm": 0.9
+          }
+        }
+      ]
+    },
+    {
+      "id": "goblins-chief-figures",
+      "faction_id": "goblins",
+      "title": "Goblin chief",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/goblins/chief-01.png",
+          "height_mm": 5.6424,
+          "calibration": {
+            "feature": "head or helmet width excluding ears and crest",
+            "pixels": 245,
+            "mm": 0.9
+          }
+        }
+      ]
+    },
+    {
+      "id": "orcs-troll-figures",
+      "faction_id": "orcs",
+      "title": "Trolls",
+      "entity_kind": "unit",
+      "suggested_type": "monstrosities",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 2,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/orcs/troll-01.png",
+          "height_mm": 13.6316,
+          "calibration": {
+            "feature": "skull width excluding ears and hair",
+            "pixels": 190,
+            "mm": 2
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/orcs/troll-02.png",
+          "height_mm": 13.6316,
+          "calibration": {
+            "feature": "skull width excluding ears and hair",
+            "pixels": 190,
+            "mm": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "goblins-catapult-figures",
+      "faction_id": "goblins",
+      "title": "Goblin catapults",
+      "entity_kind": "unit",
+      "suggested_type": "monstrosities",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/goblins/catapult-01.png",
+          "height_mm": 13.7143,
+          "calibration": {
+            "feature": "front wheel diameter",
+            "pixels": 280,
+            "mm": 2.5
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/goblins/catapult-02.png",
+          "height_mm": 13.7143,
+          "calibration": {
+            "feature": "front wheel diameter",
+            "pixels": 280,
+            "mm": 2.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "barons-red-ballista-figures",
+      "faction_id": "barons-red",
+      "title": "Red Baron ballista",
+      "entity_kind": "unit",
+      "suggested_type": "monstrosities",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-red/ballista-01.png",
+          "height_mm": 14.1312,
+          "calibration": {
+            "feature": "front wheel diameter",
+            "pixels": 250,
+            "mm": 2.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "barons-blue-ballista-figures",
+      "faction_id": "barons-blue",
+      "title": "Blue Baron ballista",
+      "entity_kind": "unit",
+      "suggested_type": "monstrosities",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/wars-of-the-roses/barons-blue/ballista-01.png",
+          "height_mm": 14.1312,
+          "calibration": {
+            "feature": "front wheel diameter",
+            "pixels": 250,
+            "mm": 2.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "rohan-rider-figures",
+      "faction_id": "rohan",
+      "title": "Rohirrim riders",
+      "entity_kind": "unit",
+      "suggested_type": "heavy_riders",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 3,
+        "scale": 1,
+        "jitter": 0.01,
+        "rotation": 1
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/rohan/rider-01.png",
+          "height_mm": 16.0,
+          "calibration": {
+            "feature": "helmet width excluding hair and crest",
+            "pixels": 120,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/rohan/rider-02.png",
+          "height_mm": 16.8421,
+          "calibration": {
+            "feature": "helmet width excluding hair and crest",
+            "pixels": 114,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "rohan-spear-figures",
+      "faction_id": "rohan",
+      "title": "Rohirrim spear warriors",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 4,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/rohan/spearman-01.png",
+          "height_mm": 12.3871,
+          "calibration": {
+            "feature": "helmet width excluding hair and crest",
+            "pixels": 155,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/rohan/spearman-02.png",
+          "height_mm": 11.2941,
+          "calibration": {
+            "feature": "helmet width excluding hair and crest",
+            "pixels": 170,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "rohan-archer-figures",
+      "faction_id": "rohan",
+      "title": "Rohirrim archers",
+      "entity_kind": "unit",
+      "suggested_type": "skirmishers",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 5,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/rohan/archer-01.png",
+          "height_mm": 10.3784,
+          "calibration": {
+            "feature": "helmet width excluding hair and crest",
+            "pixels": 185,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "rohan-leader-figures",
+      "faction_id": "rohan",
+      "title": "Rohirrim mounted captain",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 0.85,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/rohan/leader-01.png",
+          "height_mm": 16.0,
+          "calibration": {
+            "feature": "helmet width excluding hair and crest",
+            "pixels": 120,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "gondor-sword-figures",
+      "faction_id": "gondor",
+      "title": "Gondor swordsmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 4,
+        "scale": 1,
+        "jitter": 0.01,
+        "rotation": 1
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/swordsman-overhead-01.png",
+          "height_mm": 7.4226,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 210,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/swordsman-overhead-02.png",
+          "height_mm": 7.0852,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 220,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "gondor-spear-figures",
+      "faction_id": "gondor",
+      "title": "Gondor spearmen",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 4,
+        "scale": 1,
+        "jitter": 0.01,
+        "rotation": 1
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/spearman-overhead-01.png",
+          "height_mm": 7.0852,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 220,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "gondor-knight-figures",
+      "faction_id": "gondor",
+      "title": "Gondor mounted knights",
+      "entity_kind": "unit",
+      "suggested_type": "heavy_riders",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 3,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/knight-overhead-01.png",
+          "height_mm": 16.6957,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 115,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/knight-overhead-02.png",
+          "height_mm": 16.0,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 120,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "gondor-captain-figures",
+      "faction_id": "gondor",
+      "title": "Gondor mounted captain",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 0.9,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/captain-overhead-01.png",
+          "height_mm": 16.0,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 120,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "high-elves-spear-figures",
+      "faction_id": "high-elves",
+      "title": "High Elf spear warriors",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 5,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/high-elves/spearman-01.png",
+          "height_mm": 9.1429,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 210,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/high-elves/spearman-02.png",
+          "height_mm": 10.1053,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 190,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "high-elves-archer-figures",
+      "faction_id": "high-elves",
+      "title": "High Elf archers",
+      "entity_kind": "unit",
+      "suggested_type": "skirmishers",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 5,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/high-elves/archer-01.png",
+          "height_mm": 9.1429,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 210,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "high-elves-captain-figures",
+      "faction_id": "high-elves",
+      "title": "High Elf captain",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/high-elves/captain-01.png",
+          "height_mm": 9.1429,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 210,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "silvan-elves-spear-figures",
+      "faction_id": "silvan-elves",
+      "title": "Silvan Elf spear warriors",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 6,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/silvan-elves/spearman-01.png",
+          "height_mm": 7.1111,
+          "calibration": {
+            "feature": "close-fitting hood width excluding ears and hair",
+            "pixels": 270,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "silvan-elves-archer-figures",
+      "faction_id": "silvan-elves",
+      "title": "Silvan Elf archers",
+      "entity_kind": "unit",
+      "suggested_type": "skirmishers",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 6,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/silvan-elves/archer-01.png",
+          "height_mm": 6.8571,
+          "calibration": {
+            "feature": "close-fitting hood width excluding ears and hair",
+            "pixels": 280,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/silvan-elves/archer-02.png",
+          "height_mm": 6.9818,
+          "calibration": {
+            "feature": "close-fitting hood width excluding ears and hair",
+            "pixels": 275,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "silvan-elves-captain-figures",
+      "faction_id": "silvan-elves",
+      "title": "Silvan Elf captain",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/silvan-elves/captain-01.png",
+          "height_mm": 6.8571,
+          "calibration": {
+            "feature": "close-fitting hood width excluding ears and hair",
+            "pixels": 280,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "ents-ent-figures",
+      "faction_id": "ents",
+      "title": "Ents",
+      "entity_kind": "unit",
+      "suggested_type": "monstrosities",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 2,
+        "scale": 0.85,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/ents/ent-01.png",
+          "height_mm": 15.36,
+          "calibration": {
+            "feature": "woody head width excluding branches and foliage",
+            "pixels": 200,
+            "mm": 2
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/ents/ent-02.png",
+          "height_mm": 16.1684,
+          "calibration": {
+            "feature": "woody head width excluding branches and foliage",
+            "pixels": 190,
+            "mm": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "ents-elder-figures",
+      "faction_id": "ents",
+      "title": "Ent elder",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/ents/elder-01.png",
+          "height_mm": 12.288,
+          "calibration": {
+            "feature": "woody head width excluding branches and foliage",
+            "pixels": 250,
+            "mm": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "haradrim-spearman-figures",
+      "faction_id": "haradrim",
+      "title": "Haradrim spear warriors",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 5,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/haradrim/spearman-01.png",
+          "height_mm": 8.3478,
+          "calibration": {
+            "feature": "wrapped turban width excluding loose cloth tails",
+            "pixels": 230,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/haradrim/spearman-02.png",
+          "height_mm": 7.2453,
+          "calibration": {
+            "feature": "wrapped turban width excluding loose cloth tails",
+            "pixels": 265,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "haradrim-archer-figures",
+      "faction_id": "haradrim",
+      "title": "Haradrim archers",
+      "entity_kind": "unit",
+      "suggested_type": "skirmishers",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 5,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/haradrim/archer-01.png",
+          "height_mm": 6.8571,
+          "calibration": {
+            "feature": "wrapped turban width excluding loose cloth tails",
+            "pixels": 280,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/haradrim/archer-02.png",
+          "height_mm": 6.6207,
+          "calibration": {
+            "feature": "wrapped turban width excluding loose cloth tails",
+            "pixels": 290,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "haradrim-rider-figures",
+      "faction_id": "haradrim",
+      "title": "Haradrim light riders",
+      "entity_kind": "unit",
+      "suggested_type": "light_riders",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 3,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/haradrim/rider-01.png",
+          "height_mm": 11.6364,
+          "calibration": {
+            "feature": "wrapped turban width excluding loose cloth tails",
+            "pixels": 165,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/haradrim/rider-02.png",
+          "height_mm": 11.2941,
+          "calibration": {
+            "feature": "wrapped turban width excluding loose cloth tails",
+            "pixels": 170,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "haradrim-captain-figures",
+      "faction_id": "haradrim",
+      "title": "Haradrim captain",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/haradrim/captain-01.png",
+          "height_mm": 6.8571,
+          "calibration": {
+            "feature": "wrapped turban width excluding loose cloth tails",
+            "pixels": 280,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "easterlings-spearman-figures",
+      "faction_id": "easterlings",
+      "title": "Easterlings spear warriors",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 5,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/easterlings/spearman-01.png",
+          "height_mm": 9.1429,
+          "calibration": {
+            "feature": "helmet width excluding crest and shoulder armour",
+            "pixels": 210,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/easterlings/spearman-02.png",
+          "height_mm": 8.3478,
+          "calibration": {
+            "feature": "helmet width excluding crest and shoulder armour",
+            "pixels": 230,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "easterlings-archer-figures",
+      "faction_id": "easterlings",
+      "title": "Easterlings archers",
+      "entity_kind": "unit",
+      "suggested_type": "skirmishers",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 5,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/easterlings/archer-01.png",
+          "height_mm": 8.0,
+          "calibration": {
+            "feature": "helmet width excluding crest and shoulder armour",
+            "pixels": 240,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/easterlings/archer-02.png",
+          "height_mm": 8.0,
+          "calibration": {
+            "feature": "helmet width excluding crest and shoulder armour",
+            "pixels": 240,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "easterlings-rider-figures",
+      "faction_id": "easterlings",
+      "title": "Easterlings heavy riders",
+      "entity_kind": "unit",
+      "suggested_type": "heavy_riders",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 2,
+        "columns": 3,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/easterlings/rider-01.png",
+          "height_mm": 12.3871,
+          "calibration": {
+            "feature": "helmet width excluding crest and shoulder armour",
+            "pixels": 155,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/easterlings/rider-02.png",
+          "height_mm": 12.8,
+          "calibration": {
+            "feature": "helmet width excluding crest and shoulder armour",
+            "pixels": 150,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "easterlings-captain-figures",
+      "faction_id": "easterlings",
+      "title": "Easterlings captain",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/easterlings/captain-01.png",
+          "height_mm": 7.8367,
+          "calibration": {
+            "feature": "helmet width excluding crest and shoulder armour",
+            "pixels": 245,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "haradrim-mumak-figures",
+      "faction_id": "haradrim",
+      "title": "Haradrim m\u00fbmak",
+      "entity_kind": "unit",
+      "suggested_type": "monstrosities",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/haradrim/mumak-01.png",
+          "height_mm": 29.5385,
+          "calibration": {
+            "feature": "crew wrapped turban width excluding loose cloth tails",
+            "pixels": 65,
+            "mm": 1.25
+          }
+        }
+      ]
+    }
+  ]
+}
