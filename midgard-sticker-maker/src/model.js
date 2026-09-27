@@ -29,12 +29,12 @@ export function emptyProject() {
     return {
         schema_version: 3, game: 'midgard', title: 'My Midgard force',
         basing: {frontage: 40, foot: 2, mounted: 1, monster: 1, leader: 1},
-        terrain: {color: '#e8e0ce', image: null, scale: 1}, custom_artwork: [],
+        terrain: {color: '#e8e0ce', image: null, scale: 1, tint: 0, opacity: 1}, custom_artwork: [],
         source: null, profile_defaults: {}, templates: [],
         units: [], contingents: [defaultContingent()],
         print_settings: {paper: 'letter', orientation: 'portrait', dpi: 300,
             margin_mm: 5, gap_mm: 1, fit: 'contain', labels: false, cut_lines: true, supersample: 2,
-            contingent_labels: true, contingent_border: false, contingent_border_width_mm: 0.6,
+            contingent_labels: true, contingent_border: false, contingent_border_width_mm: 0.6, label_font_mm: 2,
             allow_overflow: false},
     };
 }
@@ -75,6 +75,31 @@ export function uniqueKey(key, taken) {
     for (let n = 2; taken.has(candidate); n++) candidate = `${(key || 'Template').slice(0, 195)} ${n}`;
     taken.add(candidate);
     return candidate;
+}
+// A faction's ready-made templates are derived from its figure collections, never listed, so a
+// new artwork batch joins its faction's defaults with no extra step. Army-list order: leaders,
+// then foot, mounted and monsters, then by title.
+const LIST_ORDER = ['leader', 'foot', 'mounted', 'monster'];
+export function factionFigureArt(catalog, factionId) {
+    const rank = art => LIST_ORDER.indexOf(art.entity_kind === 'hero' ? 'leader' : TYPES[art.suggested_type]?.category);
+    return catalog.artwork.filter(a => a.faction_id === factionId && a.mode === 'figures')
+        .sort((a, b) => rank(a) - rank(b) || a.title.localeCompare(b.title));
+}
+// A default already loaded is one still keyed on its collection's title, the same test
+// templateForArt() uses; one the user renamed or retargeted is theirs, and gets a fresh default.
+export function hasDefaultTemplate(p, art) {
+    return p.templates.some(t => t.artwork_id === art.id && t.key === art.title);
+}
+export function defaultTemplates(p, catalog, factionId, artIds = null) {
+    const taken = new Set(p.templates.map(t => t.key)), templates = [], present = [];
+    for (const art of factionFigureArt(catalog, factionId)) {
+        if (artIds && !artIds.includes(art.id)) continue;
+        if (hasDefaultTemplate(p, art)) { present.push(art); continue; }
+        const t = newTemplate(art, p.basing);
+        t.key = t.label = uniqueKey(art.title, taken);
+        templates.push(t);
+    }
+    return {templates, present};
 }
 // The render boundary wants whole units; the editor and the saved file keep them templated.
 export function resolveUnit(p, unit) {
@@ -195,6 +220,11 @@ export function validateProject(input) {
     ensure(/^#[\da-f]{6}$/i.test(p.terrain?.color), 'Choose a valid terrain color.');
     p.terrain.scale ??= 3; // Preserve the original texture scale for earlier version-2 saves.
     number(p.terrain.scale, 1, 3, 'Terrain detail scale');
+    // Earlier saves draw the image untinted and fully opaque, so those are the defaults.
+    p.terrain.tint ??= 0;
+    p.terrain.opacity ??= 1;
+    number(p.terrain.tint, 0, 1, 'Terrain tint strength');
+    number(p.terrain.opacity, 0, 1, 'Terrain texture strength');
     ensure(p.terrain.image === null || isImageData(p.terrain.image) || TERRAINS.some(t => t.path === p.terrain.image), 'Choose a bundled terrain or import a PNG, JPEG or WebP image.');
     ensure(Array.isArray(p.custom_artwork) && p.custom_artwork.length <= 100, 'At most 100 imported figure collections are supported.');
     unique(p.custom_artwork, 'artwork');
@@ -282,6 +312,8 @@ export function validateProject(input) {
     ensure(typeof s.allow_overflow === 'boolean', 'Invalid safe-area option.');
     ensure(typeof s.contingent_labels === 'boolean' && typeof s.contingent_border === 'boolean', 'Invalid contingent marking options.');
     number(s.contingent_border_width_mm, 0.2, 2, 'Contingent border width');
+    s.label_font_mm ??= 2; // The size every label printed at before it was adjustable.
+    number(s.label_font_mm, 1, 4, 'Label text size');
     return p;
 }
 export function groupFor(p, u) {

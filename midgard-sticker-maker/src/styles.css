@@ -20,7 +20,7 @@ body {
 }
 
 header {
-    padding: 30px 4vw 26px;
+    padding: 14px 4vw;
     border-bottom: 1px solid var(--line);
     display: flex;
     justify-content: space-between;
@@ -36,22 +36,15 @@ p {
 }
 
 h1 {
-    font: 600 34px/1.2 Georgia, serif;
-    margin: 6px 0 9px
+    font: 600 28px/1.2 Georgia, serif;
+    margin: 0 0 2px
 }
 
 h2 {
     font: 600 23px/1.3 Georgia, serif
 }
 
-.eyebrow {
-    font-size: 11px;
-    letter-spacing: .18em;
-    color: var(--accent);
-    font-weight: 700
-}
-
-header p:not(.eyebrow),
+header p,
 .hint {
     color: var(--muted)
 }
@@ -116,12 +109,69 @@ input[type=checkbox] {
     accent-color: var(--accent)
 }
 
-.tabs {
+.app-bar {
     display: flex;
-    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
     padding: 0 4vw;
     border-bottom: 1px solid var(--line);
     background: #f0efe6
+}
+
+.tabs {
+    display: flex;
+    gap: 4px
+}
+
+.app-bar .toolbar {
+    align-items: center;
+    padding: 6px 0
+}
+
+.menu {
+    position: relative
+}
+
+.menu-list {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 20;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    padding: 6px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .12)
+}
+
+.menu-list button {
+    border: none;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    white-space: nowrap
+}
+
+.menu-list button span {
+    font-size: 12px;
+    color: var(--muted)
+}
+
+.menu-list button.danger {
+    color: #9b3325
+}
+
+.menu-list hr {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 6px 0
 }
 
 .tab {
@@ -146,7 +196,12 @@ input[type=checkbox] {
 
 .layout {
     display: grid;
-    grid-template-columns: minmax(320px, 1.15fr) 14px minmax(390px, 1fr);
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    gap: 32px;
+    padding: 28px 4vw
+}
+
+.templates-panel {
     padding: 28px 4vw
 }
 
@@ -156,37 +211,22 @@ input[type=checkbox] {
     margin: 0 auto
 }
 
-.pane-resizer {
-    position: relative;
-    cursor: col-resize;
-    touch-action: none
+/* Zero templates is the one state the Force tab cannot recover from on its own. */
+.tab-count {
+    display: inline-block;
+    min-width: 20px;
+    margin-left: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--wash);
+    font: 600 12px/20px system-ui, sans-serif;
+    color: var(--muted);
+    text-align: center
 }
 
-.pane-resizer::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: var(--line);
-    transform: translateX(-50%)
-}
-
-.pane-resizer:hover::before,
-.pane-resizer:focus-visible::before,
-.pane-resizer.dragging::before {
-    background: var(--accent);
-    width: 3px
-}
-
-.pane-resizer:focus-visible {
-    outline: none
-}
-
-body.resizing {
-    cursor: col-resize;
-    user-select: none
+.tab-count.needed {
+    background: #b28734;
+    color: white
 }
 
 .section-heading {
@@ -273,14 +313,9 @@ body.resizing {
     flex: 1
 }
 
-.templates-pane {
-    min-width: 0;
-    padding-right: 18px
-}
-
+.templates-pane,
 .workspace {
-    min-width: 0;
-    padding-left: 18px
+    min-width: 0
 }
 
 .toolbar,
@@ -309,7 +344,7 @@ body.resizing {
 
 .roster {
     display: grid;
-    grid-template-columns: 20px 32px minmax(90px, 1.2fr) 78px minmax(70px, 1fr) 104px 52px;
+    grid-template-columns: 32px 32px minmax(90px, 1.2fr) 78px minmax(70px, 1fr) 104px 52px;
     font-size: 12.5px
 }
 
@@ -361,8 +396,15 @@ body.resizing {
 .expand-toggle {
     border: none;
     background: transparent;
-    padding: 2px 4px;
-    color: var(--muted)
+    padding: 0 6px;
+    font-size: 2em;
+    line-height: 1;
+    color: var(--accent);
+    cursor: pointer
+}
+
+.expand-toggle:hover {
+    color: var(--ink)
 }
 
 .roster-thumb-cell {
@@ -564,22 +606,27 @@ footer {
         grid-template-columns: 1fr
     }
 
-    .pane-resizer {
-        display: none
-    }
-
-    .templates-pane {
-        padding-right: 0
-    }
-
     .workspace {
         border-top: 1px solid var(--line);
-        padding: 25px 0 0
+        padding-top: 25px
+    }
+
+    .palette-pane {
+        position: static
+    }
+
+    .palette {
+        max-height: none;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr))
     }
 
     header {
         align-items: start;
-        flex-direction: column
+        flex-direction: column    }
+
+    .save-status {
+        text-align: left
     }
 }
 
@@ -598,7 +645,7 @@ footer {
     }
 
     h1 {
-        font-size: 28px
+        font-size: 24px
     }
 }
 
@@ -672,7 +719,7 @@ footer {
     margin: 0 0 16px;
 }
 
-.save-status {padding: 10px 4vw; font-size: 12px; color: var(--muted)}
+.save-status {font-size: 12px; color: var(--muted); max-width: 320px; text-align: right}
 .formation-controls {margin: 12px 0; border: 1px solid var(--line); border-radius: 6px; min-width: 0}
 .formation-controls legend {color: var(--accent); font-weight: 600}
 .formation-controls button {margin: 8px 0}
@@ -693,6 +740,35 @@ dialog {
     color: var(--ink);
     padding: 22px;
     max-width: 440px
+}
+
+header .builder-link {
+    font-size: 14px
+}
+
+header a,
+dialog a {
+    color: var(--accent)
+}
+
+#import-help {
+    min-width: 36px;
+    font-weight: 700
+}
+
+.help-steps {
+    margin: 14px 0;
+    padding-left: 22px
+}
+
+.help-steps li + li {
+    margin-top: 8px
+}
+
+.dialog-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px
 }
 
 dialog::backdrop {
@@ -718,13 +794,101 @@ dialog::backdrop {
     display: flex;
     align-items: end;
     gap: 12px;
+    flex-wrap: wrap;
     margin-bottom: 18px;
 }
 
-.template-toolbar .add-contingent-field {
+.toolbar-spacer {
+    flex: 1;
+}
+
+.inline-check {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    align-self: center;
+}
+
+/* One card per row: a card's settings and its preview need the width more than cards need to sit side by side. */
+#templates {
+    display: flex;
+    flex-direction: column;
+}
+
+.palette-pane {
+    position: sticky;
+    top: 12px;
+    align-self: start;
+    min-width: 0;
+}
+
+.palette-pane .add-contingent-field {
+    margin: 12px 0;
+}
+
+.palette {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: calc(100vh - 170px);
+    overflow-y: auto;
+    padding: 2px;
+}
+
+.palette-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 5px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #eef1e8;
+}
+
+.palette-text {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-width: 0;
-    margin: 0;
+    line-height: 1.3;
+}
+
+.palette-name {
+    font-weight: 600;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.palette-meta {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.palette-edit {
+    flex: 0 0 auto;
+    padding: 3px 8px;
+    font-size: 13px;
+}
+
+.palette-item .template-add {
+    width: 72px;
+    height: 36px;
+}
+
+.palette-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 10px;
+    padding: 16px;
+    border: 1px dashed #b28734;
+    border-radius: 7px;
+    background: #fbf5e8;
+    margin-top: 12px;
 }
 
 .template-artwork {
@@ -790,19 +954,72 @@ dialog::backdrop {
     padding: 13px 0 4px;
 }
 
-.template-card .detail > * {
+.template-detail:not([hidden]) {
+    display: grid;
+    grid-template-columns: minmax(300px, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.template-settings {
+    min-width: 0;
+}
+
+.template-settings > * + * {
     margin-top: 10px;
 }
 
-.template-card .detail > *:first-child {
-    margin-top: 0;
+/* The preview stays in view while a long formation is scrolled through. */
+.template-look {
+    position: sticky;
+    top: 12px;
+    min-width: 0;
 }
+
+.template-look:empty {
+    display: none;
+}
+
+/* A square mounted base at full column width would dwarf its settings. */
+.template-look .template-composition:not(.actual-size) {
+    width: auto;
+    max-width: 100%;
+    max-height: min(60vh, 480px);
+}
+
+.template-illustration {
+    display: block;
+    max-width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+}
+
 .template-composition {
     display: block;
     width: 100%;
-    max-width: 420px;
+    max-width: 640px;
     border: 1px solid var(--line);
     border-radius: 4px;
+}
+
+/* An actual-size base can be wider than its card, so it scrolls rather than shrinks. */
+.composition-frame {
+    overflow-x: auto;
+}
+
+.template-composition.actual-size {
+    max-width: none;
+    box-sizing: content-box;
+    border: none;
+    border-radius: 0;
+    outline: 1px solid var(--line);
+}
+
+.calibrate-bar {
+    height: 54px;
+    margin: 16px 0;
+    border-radius: 3px;
+    background: var(--accent);
 }
 
 /* The artwork catalog is a picker now, so it needs room the 440px default dialog does not give. */
@@ -862,4 +1079,45 @@ dialog::backdrop {
     color: #fff;
     background: var(--accent);
     border-radius: 3px;
+}
+
+/* One row per collection a faction load would create, checked unless it is already loaded. */
+.faction-template-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 14px 0 0
+}
+
+.faction-template-choices label {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px
+}
+
+.faction-template-choices .template-meta {
+    margin-left: auto;
+    text-align: right
+}
+
+.faction-template-choices label:has(input:disabled) {
+    color: var(--muted)
+}
+
+.summary-note {
+    font-weight: 400;
+    color: var(--muted)
+}
+
+/* Stacked, the preview leads so an edit's result is above the fold. Kept last so it
+   overrides the side-by-side card body defined above. */
+@media(max-width:900px) {
+    .template-detail:not([hidden]) {
+        grid-template-columns: 1fr;
+    }
+
+    .template-look {
+        position: static;
+        order: -1;
+    }
 }

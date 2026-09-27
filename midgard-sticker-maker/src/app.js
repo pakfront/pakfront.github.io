@@ -1,4 +1,4 @@
-import {TYPES, CATEGORIES, TERRAINS, emptyProject, dimensions, formationForArt, figureCount, newSeed, newTemplate, pickContingentColor, uniqueKey, validateProject} from './model.js';
+import {TYPES, CATEGORIES, TERRAINS, emptyProject, defaultTemplates, dimensions, factionFigureArt, hasDefaultTemplate, formationForArt, figureCount, newSeed, newTemplate, pickContingentColor, uniqueKey, validateProject} from './model.js';
 import {readForces, importForce, mergeForce, describeMerge, removesAnything, repairProfiles, forceId, baseCount} from './forces.js';
 import {previewProject, exportProject, renderUnitPreview} from './render.js';
 import {saveLocal, loadLocal, importImage} from './storage.js';
@@ -13,6 +13,13 @@ let catalog, builtinArtwork, setup, timer, saveTimer, colorTimer, revision = 0, 
     expandedContingents = new Set();
 // A template card illustrates the recipe, not any one base, so its preview keeps a fixed roll.
 const TEMPLATE_PREVIEW_SEED = 2468;
+// CSS millimetres assume 96 dpi, which few screens have, so actual-size previews use a
+// per-browser calibration instead. Both are display conveniences, never part of the setup.
+const CSS_PX_PER_MM = 96 / 25.4;
+const stored = key => { try { return localStorage.getItem(key); } catch { return null; } };
+const store = (key, value) => { try { localStorage.setItem(key, value); } catch { /* preference only */ } };
+let actualSize = stored('midgard-actual-size') === '1',
+    pxPerMm = Math.min(10, Math.max(2, Number(stored('midgard-px-per-mm')) || CSS_PX_PER_MM));
 // Artwork is raw material, not a force-building step: the catalog is a picker opened either to
 // start a template or to retarget one, and it closes as soon as a collection is chosen.
 let picking = {kind: 'create'};
@@ -252,6 +259,84 @@ function createTemplate(art) {
     document.querySelector(`.template-card[data-template-id="${template.id}"]`)?.scrollIntoView({behavior: 'smooth', block: 'nearest'});
 }
 
+// A faction's figure collections as a batch of ready-made recipes. They load without bases:
+// the usual next step is importing a force and pointing each stack at one through
+// "This recipe is now", and a default nobody uses never prints.
+function figureFactions(era) {
+    return catalog.factions.filter(f => (!era || f.era_id === era) && factionFigureArt(catalog, f.id).length);
+}
+
+function syncFactionTemplateFactions() {
+    const select = $('faction-templates-faction'), chosen = select.value;
+    select.replaceChildren(...figureFactions($('faction-templates-era').value).map(f => option(f.id, f.title)));
+    if ([...select.options].some(o => o.value === chosen)) select.value = chosen;
+    renderFactionTemplateChoices();
+}
+
+function renderFactionTemplateChoices() {
+    const choices = $('faction-template-choices');
+    choices.replaceChildren();
+    for (const art of factionFigureArt(catalog, $('faction-templates-faction').value)) {
+        const loaded = hasDefaultTemplate(setup, art), box = node('input');
+        box.type = 'checkbox';
+        box.value = art.id;
+        box.checked = !loaded;
+        box.disabled = loaded;
+        const sample = {entity_kind: art.entity_kind, unit_type: art.entity_kind === 'hero' ? null : art.suggested_type};
+        const label = node('label');
+        label.append(box, node('span', art.title),
+            node('span', loaded ? 'already loaded' : `${typeName(sample)} · ${sizeFor(sample).join(' × ')} mm`, 'template-meta'));
+        choices.append(label);
+    }
+    $('faction-templates-load').disabled = !choices.querySelector('input:checked');
+}
+
+function openFactionTemplates() {
+    // Default to the faction this setup already draws most of its figures from.
+    const counts = new Map();
+    for (const t of setup.templates) {
+        const art = artFor(t);
+        if (art?.mode === 'figures' && art.faction_id) counts.set(art.faction_id, (counts.get(art.faction_id) || 0) + 1);
+    }
+    const usual = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
+    const factions = figureFactions(''), faction = factions.find(f => f.id === usual) || factions[0];
+    $('faction-templates-era').replaceChildren(option('', 'All eras'),
+        ...catalog.eras.filter(e => figureFactions(e.id).length).map(e => option(e.id, e.title)));
+    $('faction-templates-era').value = faction?.era_id || '';
+    syncFactionTemplateFactions();
+    if (faction) $('faction-templates-faction').value = faction.id;
+    $('faction-templates-bases').checked = false;
+    renderFactionTemplateChoices();
+    $('faction-templates').showModal();
+}
+
+function loadFactionTemplates() {
+    const factionId = $('faction-templates-faction').value, withBases = $('faction-templates-bases').checked;
+    const artIds = [...$('faction-template-choices').querySelectorAll('input:checked')].map(box => box.value);
+    let {templates} = defaultTemplates(setup, catalog, factionId, artIds);
+    const room = Math.min(300 - setup.templates.length, withBases ? 300 - setup.units.length : Infinity);
+    const dropped = Math.max(0, templates.length - Math.max(0, room));
+    templates = templates.slice(0, Math.max(0, room));
+    $('faction-templates').close();
+    if (!templates.length) {
+        message(dropped ? 'A setup can contain up to 300 troop templates and 300 units.' : `${factionName(factionId)}: every chosen template is already loaded.`);
+        return;
+    }
+    setup.templates.push(...templates);
+    if (withBases) for (const t of templates) {
+        const u = {id: crypto.randomUUID(), template_id: t.id, name: '', name_source: 'default',
+            seed: newSeed(), contingent_id: $('add-contingent').value};
+        u.name = defaultName(u);
+        setup.units.push(u);
+    }
+    const loaded = factionFigureArt(catalog, factionId).filter(art => hasDefaultTemplate(setup, art)).length - templates.length;
+    message(`${factionName(factionId)}: ${templates.length} template(s) added${withBases ? ', one base each' : ' without bases'}`
+        + (loaded ? `, ${loaded} already loaded` : '') + (dropped ? `, ${dropped} skipped at the 300 limit` : '') + '.');
+    renderUnits();
+    changed();
+    document.querySelector(`.template-card[data-template-id="${templates[0].id}"]`)?.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+}
+
 // A collection's suggested type and tuned formation seed a new template and nothing else:
 // changing artwork on an existing one swaps the images and leaves the recipe alone, since
 // holding that recipe is what the template is for.
@@ -362,14 +447,29 @@ function templateCard(t) {
     if (t.profile) summary.append(node('span', t.profile, 'template-profile'));
     card.append(summary);
 
-    const detail = node('div', undefined, 'detail');
+    // Settings on the left, the preview on the right, so an edit and its result sit side by side.
+    const detail = node('div', undefined, 'detail template-detail');
     detail.hidden = !expanded;
-    if (!art) detail.append(node('p', `Missing artwork: ${t.artwork_id}`, 'hint'));
+    const settings = node('div', undefined, 'template-settings'), look = node('div', undefined, 'template-look');
+    if (!art) settings.append(node('p', `Missing artwork: ${t.artwork_id}`, 'hint'));
     if (art?.mode === 'figures') {
+        const frame = node('div', undefined, 'composition-frame');
         const preview = node('img', undefined, 'template-composition');
         preview.dataset.templateId = t.id;
         preview.alt = `${t.label} formation`;
-        detail.append(preview);
+        if (actualSize) {
+            const [w, h] = sizeFor(t);
+            preview.classList.add('actual-size');
+            preview.style.width = `${w * pxPerMm}px`;
+            preview.style.height = `${h * pxPerMm}px`;
+        }
+        frame.append(preview);
+        look.append(frame);
+    } else if (art) {
+        const preview = node('img', undefined, 'template-illustration');
+        preview.src = thumb(t.artwork_id, t.variant_id);
+        preview.alt = `${t.label} illustration`;
+        look.append(preview);
     }
     const fields = node('div', undefined, 'unit-fields');
     if (t.entity_kind !== 'hero') {
@@ -403,8 +503,8 @@ function templateCard(t) {
     });
     if (art?.mode === 'figures') fields.append(node('p', `${art.variants.length} pose(s) mixed in this formation. Each base rolls its own poses and placement.`, 'hint'));
     else fields.append(field('Image variant', variants));
-    detail.append(fields);
-    if (art?.mode === 'figures') detail.append(formationControls(t));
+    settings.append(fields);
+    if (art?.mode === 'figures') settings.append(formationControls(t));
 
     const actions = node('div', undefined, 'unit-actions');
     actions.append(button('Add a base', () => addBase(t)));
@@ -433,7 +533,7 @@ function templateCard(t) {
         apply.title = 'Applied once, on request. Templates never follow their profile automatically.';
         actions.append(apply);
     }
-    detail.append(actions);
+    settings.append(actions);
     // A stack renamed in the builder arrives as a delete plus an add, so offer to move this
     // recipe onto the new template rather than guessing at the rename.
     if (!bases.length) {
@@ -452,7 +552,7 @@ function templateCard(t) {
                 changed();
                 message(`${t.label}’s artwork and formation now drive ${target.label}.`);
             });
-            detail.append(field('This recipe is now', repoint));
+            settings.append(field('This recipe is now', repoint));
         }
         const remove = button('Remove template', () => {
             setup.templates = setup.templates.filter(x => x.id !== t.id);
@@ -460,18 +560,61 @@ function templateCard(t) {
             renderUnits();
             changed();
         });
-        detail.append(remove);
-    } else detail.append(node('p', `${bases.length} base(s) use this template. Remove them first to delete it.`, 'hint'));
+        settings.append(remove);
+    } else settings.append(node('p', `${bases.length} base(s) use this template. Remove them first to delete it.`, 'hint'));
+    detail.append(settings, look);
     card.append(detail);
     return card;
 }
 
+// The Force tab's quick way to "one more of those": every template as an add button, with
+// editing left to its card on the Templates tab.
+function renderPalette() {
+    $('add-contingent-field').hidden = !setup.templates.length;
+    if (!setup.templates.length) {
+        const empty = node('div', undefined, 'palette-empty');
+        empty.append(node('p', 'Bases are built from troop templates, and this force has none yet.'),
+            node('p', 'Import a force from the builder, or set up templates by hand.', 'hint'));
+        const go = button('Set up templates', () => selectTab('templates'));
+        go.className = 'primary';
+        empty.append(go);
+        $('palette').replaceChildren(empty);
+        return;
+    }
+    $('palette').replaceChildren(...setup.templates.map(t => {
+        const item = node('div', undefined, 'palette-item'), bases = setup.units.filter(u => u.template_id === t.id).length;
+        const text = node('div', undefined, 'palette-text');
+        const name = node('span', t.label, 'palette-name');
+        name.title = t.label;
+        text.append(name, node('span', `${bases} base${bases === 1 ? '' : 's'}`, 'palette-meta'));
+        const edit = button('✎', () => editTemplate(t.id));
+        edit.className = 'palette-edit';
+        edit.title = `Edit template ${t.label}`;
+        edit.setAttribute('aria-label', edit.title);
+        item.append(addBaseButton(t, artFor(t)), text, edit);
+        return item;
+    }));
+}
+
+function editTemplate(id) {
+    expandedTemplates.add(id);
+    selectTab('templates');
+    renderTemplates();
+    updateUnitPreviews();
+    const card = document.querySelector(`.template-card[data-template-id="${CSS.escape(id)}"]`);
+    card?.scrollIntoView({block: 'start'});
+    card?.querySelector('.name-input').focus({preventScroll: true});
+}
+
 function renderTemplates() {
     $('template-count').textContent = `${setup.templates.length} template${setup.templates.length === 1 ? '' : 's'}`;
+    $('templates-tab-count').textContent = setup.templates.length;
+    $('templates-tab-count').classList.toggle('needed', !setup.templates.length);
+    renderPalette();
     $('sample-callout').hidden = setup.templates.length > 0;
     $('templates').replaceChildren();
     if (!setup.templates.length) {
-        $('templates').append(node('p', 'No templates yet. Use New template to choose artwork, or import a force.', 'hint'));
+        $('templates').append(node('p', 'No templates yet. Use New template to choose artwork, Load faction templates for a ready-made set, or import a force.', 'hint'));
         return;
     }
     for (const t of setup.templates) $('templates').append(templateCard(t));
@@ -773,7 +916,14 @@ function applyForce(force) {
         if (reimport) {
             if (removesAnything(result.changes) && !confirm(`Re-import “${force.name}”?\n\n${lines.join('\n')}\n\nArtwork, formations and per-base seeds stay as you set them.`)) return;
         } else if (setup.units.length && !confirm(`Replace the current force with “${force.name}”? Basing, terrain, imported figures and print settings stay.`)) return;
-        const {title, templates, units, contingents, notes, source} = result;
+        const {title, units, contingents, notes, source} = result;
+        let {templates} = result;
+        // A first import replaces the force, but a recipe with no bases — a loaded faction
+        // default — is waiting to be pointed at one of the new stacks through "This recipe is now".
+        if (!reimport) {
+            const used = new Set(setup.units.map(u => u.template_id)), taken = new Set(templates.map(t => t.key));
+            templates = [...templates, ...setup.templates.filter(t => !used.has(t.id)).map(t => ({...t, key: uniqueKey(t.key, taken)}))];
+        }
         setup = validateProject({...setup, title, templates, units, contingents, source});
         expandedUnits.clear();
         expandedTemplates.clear();
@@ -784,7 +934,7 @@ function applyForce(force) {
         changed();
         message([reimport
             ? `Re-imported “${title}”: ${lines.length ? lines.join('; ') : 'no roster changes'}. Artwork and formations are untouched.`
-            : `Imported “${title}”: ${units.length} base(s) in ${templates.length} template(s) and ${contingents.length} contingent(s). Artwork is a name match — set it per template.`,
+            : `Imported “${title}”: ${units.length} base(s) in ${result.templates.length} template(s) and ${contingents.length} contingent(s). Artwork is a name match — set it per template.`,
             ...notes].join(' '));
     } catch (error) {
         message(`Could not import that force: ${error.message}`);
@@ -817,13 +967,25 @@ function download(blob, name) {
     setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
+// Frontage sizes every base but rarely changes, so the collapsed settings still show it.
+function syncFrontageSummary() {
+    $('frontage-summary').textContent = ` · ${setup.basing.frontage} mm frontage`;
+}
+
 function syncSettings() {
     $('title').value = setup.title;
     for (const key of ['frontage', ...CATEGORIES]) $('base-' + key).value = setup.basing[key];
+    syncFrontageSummary();
     $('terrain-color').value = setup.terrain.color;
     $('terrain-scale').value = setup.terrain.scale ?? 3;
     const terrain = TERRAINS.find(t => t.path === setup.terrain.image);
     $('terrain-preset').value = terrain ? terrain.path : setup.terrain.image ? 'custom' : '';
+    // Tint and texture strength act on the image, so plain ground has nothing for them to change.
+    for (const key of ['tint', 'opacity']) {
+        $('terrain-' + key).value = Math.round(setup.terrain[key] * 100);
+        $('terrain-' + key + '-value').textContent = `${Math.round(setup.terrain[key] * 100)}%`;
+        $('terrain-' + key).disabled = !setup.terrain.image;
+    }
     $('terrain-status').textContent = terrain ? `${terrain.title} · shared across the army` : setup.terrain.image ? 'Custom terrain selected' : 'Plain ground color';
     for (const [key, value] of Object.entries(setup.print_settings)) {
         const el = $(key);
@@ -868,8 +1030,9 @@ async function start() {
         catch (error) { message(`Could not restore autosave: ${error.message}`); }
         updateCatalog();
         wireComposer();
-        wirePaneResizer();
+        wireTemplateDisplay();
         wireTabs();
+        wireMenu('setup-menu-button', 'setup-menu');
         syncSettings();
         for (const e of catalog.eras) $('era').append(option(e.id, e.title));
         syncFactionOptions();
@@ -884,7 +1047,7 @@ async function start() {
             renderCatalog();
         });
         $('title').addEventListener('input', () => { setup.title = $('title').value; autosave(); });
-        for (const key of ['paper', 'orientation', 'dpi', 'margin_mm', 'gap_mm', 'fit', 'supersample', 'labels', 'cut_lines', 'contingent_labels', 'contingent_border', 'contingent_border_width_mm', 'allow_overflow']) $(key).addEventListener('change', () => {
+        for (const key of ['paper', 'orientation', 'dpi', 'margin_mm', 'gap_mm', 'fit', 'supersample', 'labels', 'cut_lines', 'contingent_labels', 'contingent_border', 'contingent_border_width_mm', 'label_font_mm', 'allow_overflow']) $(key).addEventListener('change', () => {
             const el = $(key);
             setup.print_settings[key] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? Number(el.value) : key === 'supersample' ? Number(el.value) : el.value;
             changed();
@@ -921,6 +1084,12 @@ async function start() {
             }
         });
         $('import-force').addEventListener('click', () => $('import-force-file').click());
+        $('import-help').addEventListener('click', () => $('import-help-dialog').showModal());
+        $('import-help-close').addEventListener('click', () => $('import-help-dialog').close());
+        $('import-help-import').addEventListener('click', () => {
+            $('import-help-dialog').close();
+            $('import-force-file').click();
+        });
         $('import-force-file').addEventListener('change', async () => {
             const file = $('import-force-file').files[0];
             if (!file) return;
@@ -937,6 +1106,14 @@ async function start() {
             }
         });
         $('new-template').addEventListener('click', () => openPicker({kind: 'create'}));
+        $('load-faction-templates').addEventListener('click', openFactionTemplates);
+        $('faction-templates-era').addEventListener('change', syncFactionTemplateFactions);
+        $('faction-templates-faction').addEventListener('change', renderFactionTemplateChoices);
+        $('faction-template-choices').addEventListener('change', () => {
+            $('faction-templates-load').disabled = !$('faction-template-choices').querySelector('input:checked');
+        });
+        $('faction-templates-load').addEventListener('click', loadFactionTemplates);
+        $('faction-templates-cancel').addEventListener('click', () => $('faction-templates').close());
         $('artwork-picker-cancel').addEventListener('click', () => $('artwork-picker').close());
         $('force-picker-cancel').addEventListener('click', () => $('force-picker').close());
         // Emptying the roster without losing the recipes that produced it: the templates,
@@ -999,9 +1176,9 @@ function applyPreview(img, dataUrl, warnings) {
     if (dataUrl !== null) img.src = dataUrl;
     if (!img.closest('.template-add')) img.title = warnings;
 }
-async function paintUnitPreview(images, project, unit, version = null, cache = null) {
+async function paintUnitPreview(images, project, unit, version = null, cache = null, pixelWidth = undefined) {
     try {
-        const result = await renderUnitPreview(project, structuredClone(unit), {artwork: catalog.artwork.slice()});
+        const result = await renderUnitPreview(project, structuredClone(unit), {artwork: catalog.artwork.slice()}, pixelWidth);
         const dataUrl = result.canvas.toDataURL(), warnings = result.warnings.join('\n');
         if (cache) previewCache.set(cache.key, {signature: cache.signature, dataUrl, warnings});
         for (const img of images) if (img.isConnected && (version === null || version === revision)) applyPreview(img, dataUrl, warnings);
@@ -1015,21 +1192,23 @@ function updateUnitPreviews() {
     // Snapshot once; later edits must not change a preview already rendering.
     const project = structuredClone(setup), version = revision, keys = new Set();
     const shared = {basing: project.basing, terrain: project.terrain};
+    // A base's label strip takes its room from the figures, so its size is part of the picture.
+    const {labels, contingent_labels, label_font_mm} = project.print_settings;
     // The DOM is rebuilt on every render, so reuse a cached composite instead of re-rendering
     // anything nothing relevant changed for. A base's composite depends on its template's
     // visuals plus its own roll; a template's depends on the visuals alone. One template can be
     // on screen twice — the card's preview and its summary add button — so group by key and
     // compose once for every image that wants it.
     const jobs = new Map();
-    const queue = (key, img, source, unit, signature) => {
-        if (!jobs.has(key)) jobs.set(key, {source, unit, signature, images: []});
+    const queue = (key, img, source, unit, signature, pixelWidth) => {
+        if (!jobs.has(key)) jobs.set(key, {source, unit, signature, pixelWidth, images: []});
         jobs.get(key).images.push(img);
     };
     for (const img of unitImages) {
         const unit = project.units.find(u => u.id === img.dataset.unitId);
         const t = unit && project.templates.find(t => t.id === unit.template_id);
         if (!t) continue;
-        queue(unit.id, img, project, unit, JSON.stringify({template: visualsOf(t), seed: unit.seed, ...shared}));
+        queue(unit.id, img, project, unit, JSON.stringify({template: visualsOf(t), seed: unit.seed, labels, contingent_labels, label_font_mm, ...shared}));
     }
     // Template previews illustrate the recipe on a fixed roll, with no labels or markings.
     const recipeProject = {...project, contingents: [], print_settings: {...project.print_settings, labels: false}};
@@ -1037,7 +1216,10 @@ function updateUnitPreviews() {
         const t = project.templates.find(t => t.id === img.dataset.templateId);
         if (!t) continue;
         const sample = {id: t.id, template_id: t.id, name: t.label, name_source: 'custom', seed: TEMPLATE_PREVIEW_SEED, contingent_id: null};
-        queue(`template:${t.id}`, img, recipeProject, sample, JSON.stringify({template: visualsOf(t), seed: TEMPLATE_PREVIEW_SEED, ...shared}));
+        // The card's preview column is wider than the roster's, and actual size can be several
+        // times that again on a high-density screen.
+        const pixelWidth = actualSize ? Math.min(2400, Math.max(640, Math.ceil(dimensions(t, project.basing)[0] * pxPerMm * devicePixelRatio))) : 640;
+        queue(`template:${t.id}`, img, recipeProject, sample, JSON.stringify({template: visualsOf(t), seed: TEMPLATE_PREVIEW_SEED, pixelWidth, ...shared}), pixelWidth);
     }
     for (const [key, job] of jobs) {
         keys.add(key);
@@ -1046,7 +1228,7 @@ function updateUnitPreviews() {
             for (const img of job.images) applyPreview(img, cached.dataUrl, cached.warnings);
             continue;
         }
-        paintUnitPreview(job.images, job.source, job.unit, version, {key, signature: job.signature});
+        paintUnitPreview(job.images, job.source, job.unit, version, {key, signature: job.signature}, job.pixelWidth);
     }
     for (const key of previewCache.keys()) if (!keys.has(key)) previewCache.delete(key);
 }
@@ -1098,6 +1280,7 @@ function wireComposer() {
     });
     for (const key of ['frontage', ...CATEGORIES]) $('base-' + key).addEventListener('change', () => {
         setup.basing[key] = Number($('base-' + key).value);
+        syncFrontageSummary();
         // Mounted riders auto-halve rows for 2:1 basing at creation time; re-balance existing
         // templates too so switching the ratio later doesn't leave them overflowing their base.
         if (key === 'mounted') for (const t of setup.templates) {
@@ -1108,6 +1291,12 @@ function wireComposer() {
     });
     $('terrain-color').addEventListener('input', () => {
         setup.terrain.color = $('terrain-color').value;
+        clearTimeout(colorTimer);
+        colorTimer = setTimeout(() => { renderCatalog(); changed(); }, 120);
+    });
+    for (const key of ['tint', 'opacity']) $('terrain-' + key).addEventListener('input', () => {
+        setup.terrain[key] = Number($('terrain-' + key).value) / 100;
+        $('terrain-' + key + '-value').textContent = `${$('terrain-' + key).value}%`;
         clearTimeout(colorTimer);
         colorTimer = setTimeout(() => { renderCatalog(); changed(); }, 120);
     });
@@ -1149,51 +1338,59 @@ function wireComposer() {
     });
     $('cancel-export').addEventListener('click', () => { cancelExport = true; });
 }
-function wirePaneResizer() {
-    const layout = $('panel-force'), resizer = $('pane-resizer'), stacked = matchMedia('(max-width: 900px)');
-    // Below the stacked-layout breakpoint an inline width would override the single-column CSS.
-    const applySplit = pct => {
-        layout.style.gridTemplateColumns = stacked.matches ? '' : `minmax(320px, ${pct}fr) 14px minmax(390px, ${1 - pct}fr)`;
-        resizer.setAttribute('aria-valuenow', String(Math.round(pct * 100)));
-    };
-    const clamp = pct => Math.min(.8, Math.max(.2, pct));
-    let pct = clamp(Number(localStorage.getItem('midgard-pane-split')) || .535);
-    applySplit(pct);
-    stacked.addEventListener('change', () => applySplit(pct));
-    resizer.addEventListener('pointerdown', e => {
-        resizer.setPointerCapture(e.pointerId);
-        resizer.classList.add('dragging');
-        document.body.classList.add('resizing');
+// Actual size is a display preference: toggling or recalibrating repaints the template cards only.
+function wireTemplateDisplay() {
+    const repaint = () => { renderTemplates(); updateUnitPreviews(); };
+    const bar = () => { $('calibrate-bar').style.width = `${85.6 * pxPerMm}px`; };
+    $('actual-size').checked = actualSize;
+    $('actual-size').addEventListener('change', () => {
+        actualSize = $('actual-size').checked;
+        store('midgard-actual-size', actualSize ? '1' : '0');
+        repaint();
     });
-    resizer.addEventListener('pointermove', e => {
-        if (!resizer.hasPointerCapture(e.pointerId)) return;
-        const rect = layout.getBoundingClientRect();
-        pct = clamp((e.clientX - rect.left) / (rect.width - 14));
-        applySplit(pct);
+    $('calibrate').addEventListener('click', () => {
+        $('calibrate-scale').value = pxPerMm;
+        bar();
+        $('calibrate-dialog').showModal();
     });
-    resizer.addEventListener('pointerup', e => {
-        resizer.releasePointerCapture(e.pointerId);
-        resizer.classList.remove('dragging');
-        document.body.classList.remove('resizing');
-        localStorage.setItem('midgard-pane-split', String(pct));
-    });
-    resizer.addEventListener('keydown', e => {
-        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-        e.preventDefault();
-        pct = clamp(pct + (e.key === 'ArrowRight' ? .02 : -.02));
-        applySplit(pct);
-        localStorage.setItem('midgard-pane-split', String(pct));
+    $('calibrate-scale').addEventListener('input', () => { pxPerMm = Number($('calibrate-scale').value); bar(); });
+    $('calibrate-reset').addEventListener('click', () => { pxPerMm = CSS_PX_PER_MM; $('calibrate-scale').value = pxPerMm; bar(); });
+    $('calibrate-done').addEventListener('click', () => $('calibrate-dialog').close());
+    $('calibrate-dialog').addEventListener('close', () => {
+        store('midgard-px-per-mm', String(pxPerMm));
+        if (actualSize) repaint();
     });
 }
-function wireTabs() {
-    const tabs = document.querySelectorAll('.tab');
-    for (const tab of tabs) tab.addEventListener('click', () => {
-        for (const other of tabs) {
-            const active = other === tab;
-            other.setAttribute('aria-selected', String(active));
-            other.tabIndex = active ? 0 : -1;
-            $(other.getAttribute('aria-controls')).hidden = !active;
+// A small disclosure menu: its items close it, as do Escape and any click outside.
+function wireMenu(buttonId, menuId) {
+    const button = $(buttonId), menu = $(menuId);
+    const setOpen = open => {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+        if (open) menu.querySelector('[role=menuitem]').focus();
+    };
+    button.addEventListener('click', () => setOpen(menu.hidden));
+    menu.addEventListener('click', e => { if (e.target.closest('[role=menuitem]')) setOpen(false); });
+    document.addEventListener('click', e => { if (!menu.hidden && !button.parentElement.contains(e.target)) setOpen(false); });
+    menu.addEventListener('keydown', e => {
+        const items = [...menu.querySelectorAll('[role=menuitem]')];
+        const i = items.indexOf(document.activeElement);
+        if (e.key === 'Escape') { setOpen(false); button.focus(); }
+        else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
         }
     });
+}
+function selectTab(name) {
+    for (const tab of document.querySelectorAll('.tab')) {
+        const active = tab.id === `tab-${name}`;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        $(tab.getAttribute('aria-controls')).hidden = !active;
+    }
+}
+function wireTabs() {
+    for (const tab of document.querySelectorAll('.tab')) tab.addEventListener('click', () => selectTab(tab.id.slice(4)));
 }
 start();

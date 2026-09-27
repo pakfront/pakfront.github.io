@@ -66,6 +66,11 @@
       "id": "easterlings",
       "era_id": "war-of-the-ring",
       "title": "Easterlings"
+    },
+    {
+      "id": "hillman",
+      "era_id": "war-of-the-ring",
+      "title": "Hillman"
     }
   ],
   "artwork": [
@@ -656,7 +661,7 @@
     {
       "id": "orcs-spear-figures",
       "faction_id": "orcs",
-      "title": "Orc spear warriors",
+      "title": "Orc warriors",
       "entity_kind": "unit",
       "suggested_type": "warriors",
       "mode": "figures",
@@ -686,6 +691,16 @@
           "calibration": {
             "feature": "head or helmet width excluding ears and crest",
             "pixels": 240,
+            "mm": 1.5
+          }
+        },
+        {
+          "id": "3",
+          "path": "assets/artwork/figures/war-of-the-ring/orcs/warrior-03.png",
+          "height_mm": 10.0174,
+          "calibration": {
+            "feature": "head or helmet width excluding ears and crest",
+            "pixels": 230,
             "mm": 1.5
           }
         }
@@ -780,6 +795,16 @@
           "calibration": {
             "feature": "head or helmet width excluding ears and crest",
             "pixels": 200,
+            "mm": 0.9
+          }
+        },
+        {
+          "id": "3",
+          "path": "assets/artwork/figures/war-of-the-ring/goblins/archer-03.png",
+          "height_mm": 5.76,
+          "calibration": {
+            "feature": "head or helmet width excluding ears and crest",
+            "pixels": 240,
             "mm": 0.9
           }
         }
@@ -1074,6 +1099,16 @@
             "pixels": 185,
             "mm": 1.25
           }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/rohan/archer-02.png",
+          "height_mm": 8.7273,
+          "calibration": {
+            "feature": "helmet width excluding hair and crest",
+            "pixels": 220,
+            "mm": 1.25
+          }
         }
       ]
     },
@@ -1140,6 +1175,16 @@
             "pixels": 220,
             "mm": 1.25
           }
+        },
+        {
+          "id": "3",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/swordsman-overhead-03.png",
+          "height_mm": 9.8462,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings (visual estimate)",
+            "pixels": 195,
+            "mm": 1.25
+          }
         }
       ]
     },
@@ -1166,6 +1211,26 @@
           "calibration": {
             "feature": "helmet width excluding crest and wings",
             "pixels": 220,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/spearman-overhead-02.png",
+          "height_mm": 10.6667,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 180,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "3",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/spearman-overhead-03.png",
+          "height_mm": 10.1053,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings (visual estimate)",
+            "pixels": 190,
             "mm": 1.25
           }
         }
@@ -1206,6 +1271,16 @@
             "pixels": 120,
             "mm": 1.25
           }
+        },
+        {
+          "id": "3",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/knight-overhead-03.png",
+          "height_mm": 17.4545,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings (visual estimate)",
+            "pixels": 110,
+            "mm": 1.25
+          }
         }
       ]
     },
@@ -1220,7 +1295,7 @@
         "shape": "rectangle",
         "rows": 1,
         "columns": 1,
-        "scale": 0.9,
+        "scale": 0.85,
         "jitter": 0,
         "rotation": 0
       },
@@ -1232,6 +1307,16 @@
           "calibration": {
             "feature": "helmet width excluding crest and wings",
             "pixels": 120,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/captain-overhead-02.png",
+          "height_mm": 17.4545,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings (visual estimate)",
+            "pixels": 110,
             "mm": 1.25
           }
         }
@@ -1300,6 +1385,16 @@
             "pixels": 210,
             "mm": 1.25
           }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/high-elves/archer-02.png",
+          "height_mm": 9.1429,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings",
+            "pixels": 210,
+            "mm": 1.25
+          }
         }
       ]
     },
@@ -1340,7 +1435,7 @@
       "mode": "figures",
       "formation_defaults": {
         "shape": "rectangle",
-        "rows": 2,
+        "rows": 1,
         "columns": 6,
         "scale": 1,
         "jitter": 0.02,
@@ -1354,6 +1449,16 @@
           "calibration": {
             "feature": "close-fitting hood width excluding ears and hair",
             "pixels": 270,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/silvan-elves/spearman-02.png",
+          "height_mm": 8.0,
+          "calibration": {
+            "feature": "close-fitting hood width excluding ears and hair",
+            "pixels": 240,
             "mm": 1.25
           }
         }
@@ -1460,6 +1565,16 @@
             "pixels": 190,
             "mm": 2
           }
+        },
+        {
+          "id": "3",
+          "path": "assets/artwork/figures/war-of-the-ring/ents/ent-03.png",
+          "height_mm": 13.9636,
+          "calibration": {
+            "feature": "woody head width excluding branches and foliage",
+            "pixels": 220,
+            "mm": 2
+          }
         }
       ]
     },
@@ -1494,7 +1609,7 @@
     {
       "id": "haradrim-spearman-figures",
       "faction_id": "haradrim",
-      "title": "Haradrim spear warriors",
+      "title": "Haradrim warriors",
       "entity_kind": "unit",
       "suggested_type": "warriors",
       "mode": "figures",
@@ -1524,6 +1639,16 @@
           "calibration": {
             "feature": "wrapped turban width excluding loose cloth tails",
             "pixels": 265,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "3",
+          "path": "assets/artwork/figures/war-of-the-ring/haradrim/warrior-03.png",
+          "height_mm": 8.0,
+          "calibration": {
+            "feature": "wrapped turban width excluding loose cloth tails",
+            "pixels": 240,
             "mm": 1.25
           }
         }
@@ -1668,6 +1793,16 @@
             "pixels": 230,
             "mm": 1.25
           }
+        },
+        {
+          "id": "3",
+          "path": "assets/artwork/figures/war-of-the-ring/easterlings/spearman-03.png",
+          "height_mm": 10.6667,
+          "calibration": {
+            "feature": "helmet width excluding crest and shoulder armour",
+            "pixels": 180,
+            "mm": 1.25
+          }
         }
       ]
     },
@@ -1798,6 +1933,194 @@
           "calibration": {
             "feature": "crew wrapped turban width excluding loose cloth tails",
             "pixels": 65,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "hillman-warrior-figures",
+      "faction_id": "hillman",
+      "title": "Hillman axe warriors",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 6,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/hillman/warrior-01.png",
+          "height_mm": 7.3846,
+          "calibration": {
+            "feature": "iron cap width excluding hair (visual estimate)",
+            "pixels": 260,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "hillman-archer-figures",
+      "faction_id": "hillman",
+      "title": "Hillman archers",
+      "entity_kind": "unit",
+      "suggested_type": "skirmishers",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 6,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/hillman/archer-01.png",
+          "height_mm": 7.8367,
+          "calibration": {
+            "feature": "iron cap width excluding hair (visual estimate)",
+            "pixels": 245,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "hillman-leader-figures",
+      "faction_id": "hillman",
+      "title": "Hillman chieftain",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/hillman/leader-01.png",
+          "height_mm": 8.0,
+          "calibration": {
+            "feature": "iron cap width excluding hair (visual estimate)",
+            "pixels": 240,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "gondor-militia-figures",
+      "faction_id": "gondor",
+      "title": "Gondor militia / fyrd",
+      "entity_kind": "unit",
+      "suggested_type": "warriors",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 4,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/militia-01.png",
+          "height_mm": 8.9302,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings (visual estimate)",
+            "pixels": 215,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/militia-02.png",
+          "height_mm": 7.8367,
+          "calibration": {
+            "feature": "helmet width excluding crest and wings (visual estimate)",
+            "pixels": 245,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "gondor-ranger-figures",
+      "faction_id": "gondor",
+      "title": "Gondor Rangers",
+      "entity_kind": "unit",
+      "suggested_type": "skirmishers",
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 4,
+        "scale": 1,
+        "jitter": 0.02,
+        "rotation": 2
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/ranger-01.png",
+          "height_mm": 7.68,
+          "calibration": {
+            "feature": "close-fitting hood width (visual estimate)",
+            "pixels": 250,
+            "mm": 1.25
+          }
+        },
+        {
+          "id": "2",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/ranger-02.png",
+          "height_mm": 7.2453,
+          "calibration": {
+            "feature": "close-fitting hood width (visual estimate)",
+            "pixels": 265,
+            "mm": 1.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "gondor-ranger-captain-figures",
+      "faction_id": "gondor",
+      "title": "Gondor Ranger captain",
+      "entity_kind": "hero",
+      "suggested_type": null,
+      "mode": "figures",
+      "formation_defaults": {
+        "shape": "rectangle",
+        "rows": 1,
+        "columns": 1,
+        "scale": 1,
+        "jitter": 0,
+        "rotation": 0
+      },
+      "variants": [
+        {
+          "id": "1",
+          "path": "assets/artwork/figures/war-of-the-ring/gondor/ranger-captain-01.png",
+          "height_mm": 7.1111,
+          "calibration": {
+            "feature": "close-fitting hood width (visual estimate)",
+            "pixels": 270,
             "mm": 1.25
           }
         }

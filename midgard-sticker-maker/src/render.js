@@ -69,7 +69,8 @@ export async function scene(p, unit, catalog) {
     const [width, height] = dimensions(unit, p.basing), group = groupFor(p, unit);
     // Border/label markings apply army-wide; only the color drawn is per-contingent.
     const border = (group && p.print_settings.contingent_border) ? p.print_settings.contingent_border_width_mm : 0;
-    const labelHeight = (p.print_settings.labels || (group && p.print_settings.contingent_labels)) ? 3 : 0;
+    // The label strip grows with its text, so a larger name takes room from the figures, not the edge.
+    const labelHeight = (p.print_settings.labels || (group && p.print_settings.contingent_labels)) ? 1.5 * (p.print_settings.label_font_mm ?? 2) : 0;
     const result = {width, height, group, border, labelHeight, art, unit, warnings: []};
     if (art.mode === 'figures') {
         const loaded = new Map();
@@ -102,11 +103,20 @@ async function drawArtwork(ctx, p, s) {
             const tileW = img.width * physicalScale, tileH = img.height * physicalScale;
             ctx.save(); ctx.beginPath(); ctx.rect(0, 0, s.width, s.height); ctx.clip();
             const offset = (s.unit.formation.seed % 1000) / 1000;
+            // Texture strength fades the image toward the ground color beneath it.
+            ctx.globalAlpha = p.terrain.opacity ?? 1;
             if (tileW >= s.width && tileH >= s.height)
                 ctx.drawImage(img, -offset * (tileW - s.width), -offset * (tileH - s.height), tileW, tileH);
             else
                 for (let ty = -offset * tileH; ty < s.height; ty += tileH)
                     for (let tx = -offset * tileW; tx < s.width; tx += tileW) ctx.drawImage(img, tx, ty, tileW, tileH);
+            // Tint recolors toward the ground color but keeps the texture's light and shade:
+            // the "color" blend takes hue and saturation from the fill, luminosity from below.
+            if (p.terrain.tint) {
+                ctx.globalAlpha = p.terrain.tint;
+                ctx.globalCompositeOperation = 'color';
+                ctx.fillStyle = p.terrain.color; ctx.fillRect(0, 0, s.width, s.height);
+            }
             ctx.restore();
         }
         // Preview retains overflow for diagnosis; export refuses it too, unless the project
@@ -129,7 +139,7 @@ async function drawBase(ctx, p, s, x, y, marks = true) {
     if (s.labelHeight) {
         const color = (s.group && p.print_settings.contingent_labels) ? s.group.color : '#f4f1e7';
         ctx.fillStyle = color; ctx.fillRect(s.border, s.height - s.border - s.labelHeight, s.width - 2 * s.border, s.labelHeight);
-        ctx.fillStyle = contrast(color); ctx.font = '2px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = contrast(color); ctx.font = `${p.print_settings.label_font_mm ?? 2}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(s.unit.name, s.width / 2, s.height - s.border - s.labelHeight / 2, Math.max(1, s.width - 2 * s.border - 1));
     }
     if (s.border) {
