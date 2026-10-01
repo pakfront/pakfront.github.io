@@ -1,4 +1,4 @@
-import {TYPES, CATEGORIES, TERRAINS, emptyProject, defaultTemplates, dimensions, factionFigureArt, hasDefaultTemplate, formationForArt, figureCount, newSeed, newTemplate, pickContingentColor, uniqueKey, validateProject} from './model.js';
+import {TYPES, CATEGORIES, TERRAINS, contingentTag, emptyProject, defaultTemplates, dimensions, factionFigureArt, hasDefaultTemplate, formationForArt, figureCount, newSeed, newTemplate, pickContingentColor, uniqueKey, validateProject} from './model.js';
 import {readForces, importForce, mergeForce, describeMerge, removesAnything, repairProfiles, forceId, baseCount} from './forces.js';
 import {previewProject, exportProject, renderUnitPreview} from './render.js';
 import {saveLocal, loadLocal, importImage} from './storage.js';
@@ -501,6 +501,26 @@ function templateCard(t) {
         renderUnits();
         changed();
     });
+    // Game data rather than looks: printed on the label strip when the Print tab asks for it.
+    // Blank means none; anything outside the range is cleared rather than saved invalid.
+    const stat = (key, label, max) => {
+        const input = node('input');
+        input.type = 'number';
+        input.min = 1;
+        input.max = max;
+        input.step = 1;
+        input.placeholder = 'None';
+        input.value = t[key] ?? '';
+        input.addEventListener('change', () => {
+            const value = Number(input.value);
+            t[key] = input.value !== '' && Number.isInteger(value) && value >= 1 && value <= max ? value : null;
+            input.value = t[key] ?? '';
+            changed();
+        });
+        fields.append(field(label, input));
+    };
+    stat('stamina', 'Stamina', 20);
+    stat('armour', 'Armour', 9);
     if (art?.mode === 'figures') fields.append(node('p', `${art.variants.length} pose(s) mixed in this formation. Each base rolls its own poses and placement.`, 'hint'));
     else fields.append(field('Image variant', variants));
     settings.append(fields);
@@ -525,7 +545,9 @@ function templateCard(t) {
                 x.variant_id = t.variant_id;
                 x.formation = structuredClone(t.formation);
             }
-            setup.profile_defaults[t.profile] = {unit_type: t.unit_type, artwork_id: t.artwork_id, variant_id: t.variant_id, formation: structuredClone(t.formation)};
+            // Stats stay behind: they follow each stack's own options in the builder.
+            setup.profile_defaults[t.profile] = {unit_type: t.unit_type, artwork_id: t.artwork_id, variant_id: t.variant_id,
+                formation: structuredClone(t.formation)};
             renderUnits();
             changed();
             message(`${t.profile}: ${siblings.length} other template(s) updated and remembered for the next import. Every base keeps its own seed.`);
@@ -669,6 +691,12 @@ function renderContingents() {
             changed();
         });
         summary.append(toggle, name, leaderLabel, color);
+        // The tag this contingent's labels carry, so the printed mark can be matched back here.
+        if (setup.contingents.length > 1) {
+            const tag = node('span', contingentTag(setup, group), 'contingent-tag');
+            tag.title = 'Printed at the start of this contingent’s labels';
+            summary.insertBefore(tag, leaderLabel);
+        }
         card.append(summary);
 
         const detail = node('div', undefined, 'detail');
@@ -720,7 +748,7 @@ function rosterTable(units) {
     const wrap = node('div', undefined, 'roster-wrap');
     const roster = node('div', undefined, 'roster');
     const head = node('div', undefined, 'roster-head');
-    for (const label of ['', '', 'Name', 'Type', 'Template', 'Size (mm)', '']) head.append(node('span', label));
+    for (const label of ['', '', 'Name', 'Type', 'Template', 'Size (mm)', 'Print', '']) head.append(node('span', label));
     roster.append(head);
     for (const u of units) roster.append(unitRow(u));
     wrap.append(roster);
@@ -776,6 +804,18 @@ function unitRow(u) {
     templateCell.title = art ? `${t.label} · ${art.title}` : `${t.label} · missing artwork ${t.artwork_id}`;
     row.append(templateCell);
     row.append(node('div', `${sizeFor(t).join(' × ')} mm`, 'dimensions cell-text'));
+    // Leaving a base out of the print run is how one damaged sticker gets reprinted alone.
+    const printCell = node('div', undefined, 'roster-print');
+    const print = node('input');
+    print.type = 'checkbox';
+    print.checked = u.print !== false;
+    print.setAttribute('aria-label', `Print ${u.name}`);
+    print.addEventListener('change', () => {
+        u.print = print.checked;
+        changed();
+    });
+    printCell.append(print);
+    row.append(printCell);
 
     const actions = node('div', undefined, 'roster-actions');
     const duplicate = button('⧉', () => {
@@ -842,6 +882,18 @@ function unitRow(u) {
         changed();
     });
     fields.append(field(commandOf(u) ? 'Contingent (commander)' : 'Contingent', contingent));
+    // A long name can print shorter on the sticker without renaming the base everywhere else.
+    const printName = node('input');
+    printName.type = 'text';
+    printName.maxLength = 200;
+    printName.placeholder = u.name;
+    printName.value = u.print_name ?? '';
+    printName.addEventListener('change', () => {
+        u.print_name = printName.value.trim() || null;
+        printName.value = u.print_name ?? '';
+        changed();
+    });
+    fields.append(field('Printed label', printName));
     detail.append(fields);
     detail.append(node('p', 'Artwork, type and formation come from the template above. Edit them there to change every base at once.', 'hint'));
     const detailActions = node('div', undefined, 'unit-actions');
@@ -892,9 +944,17 @@ async function preview() {
         pages = data.pages;
         pageIndex = 0;
         $('preview-controls').hidden = !pages.length;
-        $('preview-status').textContent = `${data.sticker_count} stickers on ${pages.length} ${setup.print_settings.paper === 'a4' ? 'A4' : 'Letter'} page(s)`;
+        const selection = data.sticker_count === data.unit_count ? `${data.sticker_count} stickers` : `${data.sticker_count} of ${data.unit_count} bases selected`;
+        const {paper, paper_width_mm: w, paper_height_mm: h} = setup.print_settings;
+        const paperName = paper === 'a4' ? 'A4' : paper === 'custom' ? `${w} × ${h} mm` : 'Letter';
+        $('preview-status').textContent = `${selection} on ${pages.length} ${paperName} page(s)`;
+        $('select-all-bases').hidden = data.sticker_count === data.unit_count;
         $('warnings').replaceChildren(...data.warnings.map(w => node('li', w)));
         if (pages.length) showPage();
+        else {
+            $('preview').classList.add('empty');
+            $('preview').replaceChildren(node('p', 'No bases are selected. Tick Print on the roster, or select all.'));
+        }
         $('pdf').disabled = $('png').disabled = !pages.length || exporting;
     } catch (error) {
         if (version !== revision) return;
@@ -972,6 +1032,10 @@ function syncFrontageSummary() {
     $('frontage-summary').textContent = ` · ${setup.basing.frontage} mm frontage`;
 }
 
+// Width and height only mean something for a custom sheet.
+function syncPaper() {
+    for (const el of document.querySelectorAll('.custom-paper')) el.hidden = $('paper').value !== 'custom';
+}
 function syncSettings() {
     $('title').value = setup.title;
     for (const key of ['frontage', ...CATEGORIES]) $('base-' + key).value = setup.basing[key];
@@ -994,6 +1058,7 @@ function syncSettings() {
             else el.value = value;
         }
     }
+    syncPaper();
 }
 async function exportFile(kind) {
     exporting = true; cancelExport = false;
@@ -1047,12 +1112,18 @@ async function start() {
             renderCatalog();
         });
         $('title').addEventListener('input', () => { setup.title = $('title').value; autosave(); });
-        for (const key of ['paper', 'orientation', 'dpi', 'margin_mm', 'gap_mm', 'fit', 'supersample', 'labels', 'cut_lines', 'contingent_labels', 'contingent_border', 'contingent_border_width_mm', 'label_font_mm', 'allow_overflow']) $(key).addEventListener('change', () => {
+        for (const key of ['paper', 'orientation', 'dpi', 'margin_mm', 'gap_mm', 'fit', 'supersample', 'labels', 'cut_lines', 'contingent_labels', 'contingent_border', 'contingent_border_width_mm', 'label_font_mm', 'contingent_tags', 'stamina_style', 'show_armour', 'bleed_mm', 'order', 'scale_bar', 'paper_width_mm', 'paper_height_mm', 'allow_overflow']) $(key).addEventListener('change', () => {
             const el = $(key);
-            setup.print_settings[key] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? Number(el.value) : key === 'supersample' ? Number(el.value) : el.value;
+            if (key === 'paper') syncPaper();
+            setup.print_settings[key] = el.type === 'checkbox' ? el.checked : el.type === 'number' || ['supersample', 'bleed_mm'].includes(key) ? Number(el.value) : el.value;
             changed();
         });
         $('add-contingent-button').addEventListener('click', () => addContingent());
+        $('select-all-bases').addEventListener('click', () => {
+            for (const u of setup.units) u.print = true;
+            renderUnits();
+            changed();
+        });
         $('save').addEventListener('click', () => {
             try { const project = validateProject(setup); download(new Blob([JSON.stringify(project) + '\n'], {type: 'application/json'}), 'midgard-setup.json'); }
             catch (error) { message(error.message); }
@@ -1193,7 +1264,7 @@ function updateUnitPreviews() {
     const project = structuredClone(setup), version = revision, keys = new Set();
     const shared = {basing: project.basing, terrain: project.terrain};
     // A base's label strip takes its room from the figures, so its size is part of the picture.
-    const {labels, contingent_labels, label_font_mm} = project.print_settings;
+    const {labels, contingent_labels, label_font_mm, contingent_tags, stamina_style, show_armour} = project.print_settings;
     // The DOM is rebuilt on every render, so reuse a cached composite instead of re-rendering
     // anything nothing relevant changed for. A base's composite depends on its template's
     // visuals plus its own roll; a template's depends on the visuals alone. One template can be
@@ -1208,10 +1279,13 @@ function updateUnitPreviews() {
         const unit = project.units.find(u => u.id === img.dataset.unitId);
         const t = unit && project.templates.find(t => t.id === unit.template_id);
         if (!t) continue;
-        queue(unit.id, img, project, unit, JSON.stringify({template: visualsOf(t), seed: unit.seed, labels, contingent_labels, label_font_mm, ...shared}));
+        const group = project.contingents.find(g => g.commander_id === unit.id) || project.contingents.find(g => g.id === unit.contingent_id);
+        const strip = {labels, contingent_labels, label_font_mm, contingent_tags, stamina_style, stamina: t.stamina, show_armour, armour: t.armour, name: unit.name,
+            print_name: unit.print_name, group: group && [group.color, contingentTag(project, group)], groups: project.contingents.length};
+        queue(unit.id, img, project, unit, JSON.stringify({template: visualsOf(t), seed: unit.seed, strip, ...shared}));
     }
     // Template previews illustrate the recipe on a fixed roll, with no labels or markings.
-    const recipeProject = {...project, contingents: [], print_settings: {...project.print_settings, labels: false}};
+    const recipeProject = {...project, contingents: [], print_settings: {...project.print_settings, labels: false, stamina_style: 'off', show_armour: false}};
     for (const img of templateImages) {
         const t = project.templates.find(t => t.id === img.dataset.templateId);
         if (!t) continue;
@@ -1251,13 +1325,13 @@ function formationControls(t) {
     const labels = SHAPE_FIELD_LABELS[t.formation.shape];
     const keys = [['rows', labels.rows, 1, 20, 1], ['columns', labels.columns, 1, 20, 1]];
     if (t.formation.shape === 'clusters') keys.push(['clusterRows', labels.clusterRows, 1, 8, 1], ['clusterColumns', labels.clusterColumns, 1, 8, 1]);
-    keys.push(['scale', 'Figure scale', .1, 4, .05], ['jitter', 'Placement irregularity', 0, .8, .05], ['rotation', 'Rotation variation (degrees)', 0, 90, 1]);
+    keys.push(['scale', 'Figure scale', .1, 4, .05], ['jitterX', 'Irregularity across', 0, .8, .05], ['jitterY', 'Irregularity in depth', 0, .8, .05], ['rotation', 'Rotation variation (degrees)', 0, 90, 1]);
     for (const [key, label, min, max, step] of keys) {
         const input = node('input'); input.type = 'number'; input.min = min; input.max = max; input.step = step; input.value = t.formation[key];
         input.addEventListener('change', () => { t.formation[key] = Number(input.value); renderUnits(); changed(); });
         fields.append(field(label, input));
     }
-    box.append(fields, node('p', '0 irregularity and 0° rotation give regular formations. This recipe is shared by every base that follows the template; each base rolls its own poses and placement.', 'hint'));
+    box.append(fields, node('p', 'Irregularity across scatters figures along the frontage, in depth from front to back; 0 in both, with 0° rotation, gives regular formations. This recipe is shared by every base that follows the template; each base rolls its own poses and placement.', 'hint'));
     return box;
 }
 function wireComposer() {

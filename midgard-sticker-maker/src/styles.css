@@ -344,7 +344,7 @@ input[type=checkbox] {
 
 .roster {
     display: grid;
-    grid-template-columns: 32px 32px minmax(90px, 1.2fr) 78px minmax(70px, 1fr) 104px 52px;
+    grid-template-columns: 32px 32px minmax(90px, 1.2fr) 78px minmax(70px, 1fr) 104px 54px 52px;
     font-size: 12.5px
 }
 
@@ -383,6 +383,7 @@ input[type=checkbox] {
 }
 
 .roster-thumb-cell,
+.roster-print,
 .roster-actions {
     display: flex;
     align-items: center
@@ -686,6 +687,15 @@ footer {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.contingent-tag {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
 }
 
 .contingent-summary input[type=color] {

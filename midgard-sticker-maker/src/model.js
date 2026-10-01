@@ -10,15 +10,36 @@ export const TERRAINS = [
     {title: 'Dry earth', path: 'assets/terrain/dry-earth.png'},
     {title: 'Pale grassland', path: 'assets/terrain/grassland.png'},
 ];
-export const CONTINGENT_COLORS = ['#a63d40', '#2864a0', '#38805b', '#8b5ca6', '#c47d19', '#167c80', '#b4537e', '#657c25'];
-// Contingents need distinct colors, so keep generating past the end of the palette.
+// Light, muted colors, so a label strip keeps dark text readable on any of them; the hues stay
+// far enough apart to tell contingents apart at a glance, with the tag for anyone who cannot.
+export const CONTINGENT_COLORS = ['#e3aaa6', '#a9c4e0', '#aed3b4', '#cdb8e0', '#e8cc9a', '#a3d4d2', '#e4b5cc', '#cad69f'];
+function hslHex(hue, saturation, lightness) {
+    const a = saturation * Math.min(lightness, 1 - lightness);
+    const channel = n => {
+        const k = (n + hue / 30) % 12;
+        return Math.round(255 * (lightness - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))).toString(16).padStart(2, '0');
+    };
+    return `#${channel(0)}${channel(8)}${channel(4)}`;
+}
+// Contingents need distinct colors, so keep generating past the end of the palette: golden-angle
+// hues at the palette's own muted, light tone.
 export function pickContingentColor(used = []) {
     const taken = new Set(Array.from(used, color => color.toLowerCase()));
     for (const color of CONTINGENT_COLORS) if (!taken.has(color)) return color;
     for (let i = 1;; i++) {
-        const color = '#' + ((i * 0x9e3779) & 0xffffff).toString(16).padStart(6, '0');
+        const color = hslHex((i * 137.508) % 360, .4 + (i % 3) * .05, .8 - (i % 2) * .03);
         if (!taken.has(color)) return color;
     }
+}
+// The short mark a label prints so contingents stay apart without relying on color. The force
+// builder names contingents I, II, III, so a name that short is the tag; longer names use their
+// position instead.
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+export function contingentTag(p, group) {
+    const name = group.name.trim();
+    if (name.length <= 4) return name;
+    const index = p.contingents.findIndex(g => g.id === group.id);
+    return ROMAN[index] ?? String(index + 1);
 }
 // Every unit belongs to a contingent, so a project always starts with (and never drops below) one.
 // Border/label markings apply uniformly army-wide (see print_settings); only color is per-contingent.
@@ -35,7 +56,8 @@ export function emptyProject() {
         print_settings: {paper: 'letter', orientation: 'portrait', dpi: 300,
             margin_mm: 5, gap_mm: 1, fit: 'contain', labels: false, cut_lines: true, supersample: 2,
             contingent_labels: true, contingent_border: false, contingent_border_width_mm: 0.6, label_font_mm: 2,
-            allow_overflow: false},
+            contingent_tags: true, stamina_style: 'off', show_armour: false, bleed_mm: 0, order: 'size', scale_bar: false,
+            paper_width_mm: 210, paper_height_mm: 297, allow_overflow: false},
     };
 }
 export function dimensions(unit, basing) {
@@ -48,10 +70,17 @@ export function newSeed() {
 }
 export function defaultFormation(hero = false) {
     return {shape: 'rectangle', rows: hero ? 1 : 2, columns: hero ? 1 : 5, clusterRows: 1, clusterColumns: 1,
-        scale: 1, jitter: 0.1, rotation: 8, seed: newSeed()};
+        scale: 1, jitterX: 0.1, jitterY: 0.1, rotation: 8, seed: newSeed()};
+}
+// Placement irregularity is set separately across the frontage (x) and in depth (y). Recipes
+// and catalog defaults from before the split carry one "jitter" for both, which splits evenly,
+// so an existing base keeps exactly the placement it had.
+export function splitJitter(f) {
+    if (f.jitter !== undefined) { f.jitterX ??= f.jitter; f.jitterY ??= f.jitter; delete f.jitter; }
+    return f;
 }
 export function formationForArt(art, basing) {
-    const f = {...defaultFormation(art.entity_kind === 'hero' || art.suggested_type === 'monstrosities'), ...art.formation_defaults};
+    const f = {...defaultFormation(art.entity_kind === 'hero' || art.suggested_type === 'monstrosities'), ...splitJitter({...art.formation_defaults})};
     if (art.mode === 'figures' && ['heavy_riders', 'light_riders'].includes(art.suggested_type) && basing?.mounted === 2) f.rows = 1;
     return f;
 }
@@ -106,7 +135,7 @@ export function resolveUnit(p, unit) {
     const t = p.templates?.find(t => t.id === unit.template_id);
     if (!t) return unit;
     return {...unit, entity_kind: t.entity_kind, unit_type: t.unit_type, artwork_id: t.artwork_id,
-        variant_id: t.variant_id, formation: {...t.formation, seed: unit.seed}};
+        variant_id: t.variant_id, stamina: t.stamina ?? null, armour: t.armour ?? null, formation: {...t.formation, seed: unit.seed}};
 }
 export function resolved(p) {
     return p.templates ? {...p, units: p.units.map(u => resolveUnit(p, u))} : p;
@@ -139,6 +168,14 @@ function number(value, min, max, label, integer = false) {
 function text(value, label) {
     ensure(typeof value === 'string' && value.trim().length > 0 && value.length <= 200 && !/[\r\n]/.test(value), `${label} must be 1–200 characters on one line.`);
 }
+// Stamina and armour are game data, not part of the look, so they are optional wherever a
+// recipe is kept.
+function stats(holder) {
+    holder.stamina ??= null;
+    if (holder.stamina !== null) number(holder.stamina, 1, 20, 'Stamina', true);
+    holder.armour ??= null;
+    if (holder.armour !== null) number(holder.armour, 1, 9, 'Armour', true);
+}
 function unique(items, label) {
     const ids = new Set();
     for (const item of items) { text(item.id, `${label} ID`); ensure(!ids.has(item.id), `Duplicate ${label} ID.`); ids.add(item.id); }
@@ -155,16 +192,19 @@ function visuals(v, entityKind, label) {
     const f = v.formation;
     ensure(f && typeof f === 'object', 'Missing formation settings.');
     f.shape ??= 'rectangle'; f.clusterRows ??= 1; f.clusterColumns ??= 1; // migrate pre-shape saves
+    splitJitter(f);
     delete f.seed; // the roll belongs to each base, never to the recipe
     ensure(['rectangle', 'clusters', 'ellipse', 'wedge'].includes(f.shape), 'Invalid formation shape.');
     number(f.rows, 1, 20, 'Rows', true); number(f.columns, 1, 20, 'Columns', true);
     number(f.clusterRows, 1, 8, 'Cluster rows', true); number(f.clusterColumns, 1, 8, 'Cluster columns', true);
     ensure(figureCount(f) <= 200, 'Use at most 200 figures per unit.');
-    number(f.scale, 0.1, 4, 'Figure scale'); number(f.jitter, 0, 0.8, 'Placement irregularity');
+    number(f.scale, 0.1, 4, 'Figure scale'); number(f.jitterX, 0, 0.8, 'Irregularity across');
+    number(f.jitterY, 0, 0.8, 'Irregularity in depth');
     number(f.rotation, 0, 90, 'Rotation variation');
 }
-const RECIPE_KEYS = ['shape', 'rows', 'columns', 'clusterRows', 'clusterColumns', 'scale', 'jitter', 'rotation'];
+const RECIPE_KEYS = ['shape', 'rows', 'columns', 'clusterRows', 'clusterColumns', 'scale', 'jitterX', 'jitterY', 'rotation'];
 function normalizeRecipe(f) {
+    f = splitJitter({...f});
     const out = {};
     for (const key of RECIPE_KEYS) out[key] = f?.[key];
     out.shape ??= 'rectangle'; out.clusterRows ??= 1; out.clusterColumns ??= 1;
@@ -263,6 +303,7 @@ export function validateProject(input) {
         ensure(['profile', 'guess', 'custom'].includes(t.type_source), 'Invalid template type source.');
         ensure(['unit', 'hero'].includes(t.entity_kind), 'Invalid template category.');
         visuals(t, t.entity_kind, 'Template');
+        stats(t);
     }
     // Remembered per-profile defaults stay in the project, so a saved file is self-contained.
     p.profile_defaults ??= {};
@@ -280,6 +321,11 @@ export function validateProject(input) {
         ensure(templateIds.has(u.template_id), 'Unknown template reference.');
         ensure(['default', 'custom'].includes(u.name_source), 'Invalid unit name source.');
         number(u.seed, 0, 4294967295, 'Formation seed', true);
+        // A shorter name for the sticker only; null prints the base's own name.
+        u.print_name ??= null;
+        u.print ??= true; // whether this base goes on the next print run
+        ensure(typeof u.print === 'boolean', 'Invalid print selection.');
+        if (u.print_name !== null) text(u.print_name, 'Printed label');
     }
     const kindOf = id => p.templates.find(t => t.id === p.units.find(u => u.id === id)?.template_id)?.entity_kind;
     if (!Array.isArray(p.contingents) || !p.contingents.length) p.contingents = [defaultContingent()]; // migrate pre-hierarchy saves
@@ -300,7 +346,12 @@ export function validateProject(input) {
     for (const u of p.units) if (!commanders.has(u.id) && (u.contingent_id === null || !groups.has(u.contingent_id))) u.contingent_id = p.contingents[0].id;
     for (const u of p.units) ensure(u.contingent_id === null || groups.has(u.contingent_id), 'Unknown contingent reference.');
     const s = p.print_settings;
-    ensure(s && ['letter', 'a4'].includes(s.paper) && ['portrait', 'landscape'].includes(s.orientation), 'Invalid paper settings.');
+    ensure(s && ['letter', 'a4', 'custom'].includes(s.paper) && ['portrait', 'landscape'].includes(s.orientation), 'Invalid paper settings.');
+    // Custom sheets (sticker paper comes in many sizes) are given portrait, like the named ones.
+    s.paper_width_mm ??= 210; s.paper_height_mm ??= 297;
+    number(s.paper_width_mm, 50, 600, 'Paper width'); number(s.paper_height_mm, 50, 600, 'Paper height');
+    s.scale_bar ??= false;
+    ensure(typeof s.scale_bar === 'boolean', 'Invalid scale bar option.');
     number(s.dpi, 72, 600, 'DPI', true); number(s.margin_mm, 0, 50, 'Margin'); number(s.gap_mm, 0, 20, 'Gap');
     ensure(['contain', 'cover', 'stretch'].includes(s.fit), 'Invalid artwork fit.');
     ensure(typeof s.labels === 'boolean' && typeof s.cut_lines === 'boolean', 'Invalid print options.');
@@ -314,6 +365,16 @@ export function validateProject(input) {
     number(s.contingent_border_width_mm, 0.2, 2, 'Contingent border width');
     s.label_font_mm ??= 2; // The size every label printed at before it was adjustable.
     number(s.label_font_mm, 1, 4, 'Label text size');
+    s.bleed_mm ??= 0; // Saves from before bleed stop the artwork at the cut line, as they always printed.
+    ensure([0, .5, 1, 1.5, 2].includes(s.bleed_mm), 'Choose a bleed of 0, 0.5, 1, 1.5 or 2 mm.');
+    s.order ??= 'size';
+    ensure(['size', 'contingent'].includes(s.order), 'Choose a sheet order: by size or by contingent.');
+    s.contingent_tags ??= true;
+    ensure(typeof s.contingent_tags === 'boolean', 'Invalid contingent tag option.');
+    s.stamina_style ??= 'off'; // Saves from before stamina printed nothing, so keep it that way.
+    s.show_armour ??= false;
+    ensure(typeof s.show_armour === 'boolean', 'Invalid armour option.');
+    ensure(['off', 'badge', 'pips'].includes(s.stamina_style), 'Choose how stamina prints: off, badge or pips.');
     return p;
 }
 export function groupFor(p, u) {
@@ -321,11 +382,19 @@ export function groupFor(p, u) {
 }
 export function pack(p) {
     const s = p.print_settings;
-    const size = s.paper === 'a4' ? [210, 297] : [215.9, 279.4];
+    const size = s.paper === 'a4' ? [210, 297] : s.paper === 'custom' ? [s.paper_width_mm, s.paper_height_mm] : [215.9, 279.4];
     if (s.orientation === 'landscape') size.reverse();
-    const margin = s.margin_mm, gap = s.gap_mm;
-    const items = p.units.map((unit, index) => ({index, unit, width: dimensions(unit, p.basing)[0], height: dimensions(unit, p.basing)[1]}));
-    items.sort((a, b) => b.height - a.height || b.width - a.width || a.index - b.index);
+    // Bleed runs past each base edge, so neighbours sit at least two bleeds apart and a base at
+    // least one bleed from the paper edge; the settings themselves never become invalid.
+    const bleed = s.bleed_mm ?? 0, margin = Math.max(s.margin_mm, bleed), gap = Math.max(s.gap_mm, 2 * bleed);
+    const items = p.units.map((unit, index) => ({index, unit, width: dimensions(unit, p.basing)[0], height: dimensions(unit, p.basing)[1]}))
+        .filter(item => item.unit.print !== false);
+    // By contingent keeps each contingent together (then each template's bases together), which
+    // makes cut stickers quicker to sort; by size alone packs into the fewest pages.
+    const contingent = item => p.contingents.indexOf(groupFor(p, item.unit));
+    const template = item => p.templates?.findIndex(t => t.id === item.unit.template_id) ?? 0;
+    const grouped = (a, b) => s.order === 'contingent' ? contingent(a) - contingent(b) || template(a) - template(b) : 0;
+    items.sort((a, b) => grouped(a, b) || b.height - a.height || b.width - a.width || a.index - b.index);
     const pages = []; let page = [], x = margin, y = margin, rowHeight = 0;
     for (const item of items) {
         if (item.width > size[0] - 2 * margin || item.height > size[1] - 2 * margin) throw Error(`${item.unit.name}: base does not fit this paper and margin.`);
@@ -354,8 +423,8 @@ function clusterSlots(f, safeW, safeH, rng) {
     for (let bi = 0; bi < f.clusterRows; bi++) for (let bj = 0; bj < f.clusterColumns; bj++) {
         // Jitter each block's own center (not just the figures within it) so clusters read as
         // loose, unevenly-placed clumps rather than one grid subdivided into neat cells.
-        const bx = (bj + 0.5 + (rng() - 0.5) * f.jitter * shrink) * blockW;
-        const by = (bi + 0.5 + (rng() - 0.5) * f.jitter * shrink) * blockH;
+        const bx = (bj + 0.5 + (rng() - 0.5) * f.jitterX * shrink) * blockW;
+        const by = (bi + 0.5 + (rng() - 0.5) * f.jitterY * shrink) * blockH;
         for (let row = 0; row < f.rows; row++) for (let col = 0; col < f.columns; col++)
             centers.push({x: bx + (col + 0.5 - f.columns / 2) * cellW, y: by + (row + 0.5 - f.rows / 2) * cellH});
     }
@@ -385,7 +454,7 @@ function wedgeSlots(f, safeW, safeH) {
     return {centers, cellW: unitW, cellH: rankH};
 }
 export function formation(unit, basing, poses, images, inset = 1, labelHeight = 0) {
-    const [w, h] = dimensions(unit, basing), f = unit.formation, rng = random(f.seed);
+    const [w, h] = dimensions(unit, basing), f = splitJitter({...unit.formation}), rng = random(f.seed);
     const safeW = w - 2 * inset, safeH = h - 2 * inset - labelHeight;
     const {centers, cellW, cellH} = f.shape === 'clusters' ? clusterSlots(f, safeW, safeH, rng)
         : f.shape === 'ellipse' ? ellipseSlots(f, safeW, safeH)
@@ -395,8 +464,8 @@ export function formation(unit, basing, poses, images, inset = 1, labelHeight = 
     for (const center of centers) {
         const pose = poses[Math.floor(rng() * poses.length)], img = images.get(pose.path);
         const height = poseHeight(pose, img) * basing.frontage / 40 * f.scale, width = height * img.width / img.height;
-        const x = inset + center.x + (rng() - 0.5) * f.jitter * cellW;
-        const y = inset + center.y + (rng() - 0.5) * f.jitter * cellH;
+        const x = inset + center.x + (rng() - 0.5) * f.jitterX * cellW;
+        const y = inset + center.y + (rng() - 0.5) * f.jitterY * cellH;
         const angle = (rng() * 2 - 1) * f.rotation * Math.PI / 180;
         const boundW = Math.abs(Math.cos(angle)) * width + Math.abs(Math.sin(angle)) * height;
         const boundH = Math.abs(Math.sin(angle)) * width + Math.abs(Math.cos(angle)) * height;

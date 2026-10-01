@@ -28,6 +28,42 @@ export const PROFILE_TYPES = {
     'Giant': 'monstrosities',
 };
 
+// The export names a profile and the option ids taken, but keeps the stats themselves on the
+// builder's site. These are the builder's own profile values (its app bundle, 2026-09-27), with
+// only the options that change armour or stamina; the rest change dice or missiles.
+// Shooters are armour 3 against shooting, which one printed number cannot show.
+export const PROFILE_STATS = {
+    'Heavy Infantry': {armour: 3, stamina: 4, options: {1: {armour: -1}, 2: {armour: 1}}},
+    'Heavy Infantry with Missiles': {armour: 3, stamina: 4, options: {1: {armour: -1}, 2: {armour: 1}}},
+    'Formed Archers': {armour: 2, stamina: 4, options: {1: {armour: 1}}},
+    'Hordes': {armour: 2, stamina: 4},
+    'Shooters': {armour: 2, stamina: 2},
+    'Light Infantry': {armour: 3, stamina: 2},
+    'Knights': {armour: 4, stamina: 3},
+    'Medium Cavalry': {armour: 3, stamina: 3},
+    'Scouts': {armour: 3, stamina: 2, options: {1: {armour: -1}}},
+    'Noble Riders & Light Chariots': {armour: 3, stamina: 2, options: {1: {armour: 1}}},
+    'Giant': {armour: 4, stamina: 3, options: {1: {armour: 1}}},
+    'Elephants & War Mammoths': {armour: 4, stamina: 3, options: {1: {armour: 1}}},
+    'Dragon': {armour: 4, stamina: 3, options: {1: {armour: 1}}},
+    'Flying Beast': {armour: 3, stamina: 2, options: {1: {armour: 1}, 2: {stamina: 1}}},
+    'Artillery': {armour: 3, stamina: 2, options: {1: {armour: 1}}},
+};
+// A stack's armour and stamina as the builder computes them. Heroes are armour 3 plus their
+// armour modifier, and stamina 2 from level 2 up (a level 1 champion has 1). A profile the
+// table does not know gets no stats rather than a guess.
+export function stackStats(stack) {
+    if (stack.kind === 'hero') {
+        const level = Number(stack.hero?.status?.level) || 0, modifier = Number(stack.hero?.armourModifier) || 0;
+        return {armour: 3 + modifier, stamina: level > 1 ? 2 : 1};
+    }
+    const profile = PROFILE_STATS[stack.profile];
+    if (!profile) return {armour: null, stamina: null};
+    const stats = {armour: profile.armour, stamina: profile.stamina};
+    for (const id of stack.options) for (const [key, change] of Object.entries(profile.options?.[id] ?? {})) stats[key] += change;
+    return stats;
+}
+
 function cleanName(value) {
     return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, 200) : '';
 }
@@ -82,13 +118,13 @@ function stacks(force) {
     const list = [];
     for (const hero of force.heroes) list.push({
         name: cleanName(hero.name) || 'Leader', kind: 'hero', hero, profile: '',
-        traits: hero.traits || [], qty: 1, slots: [grouped ? heroGroup(hero) : null],
+        traits: hero.traits || [], options: [], qty: 1, slots: [grouped ? heroGroup(hero) : null],
     });
     for (const entry of force.units) {
         const qty = quantity(entry.qty);
         list.push({
             name: cleanName(entry.name) || 'Unit', kind: 'unit', hero: null, profile: cleanName(entry.profile),
-            traits: entry.traits || [], qty, slots: grouped ? unitGroups(entry, qty) : Array(qty).fill(null),
+            traits: entry.traits || [], options: Array.isArray(entry.options) ? entry.options.map(Number) : [], qty, slots: grouped ? unitGroups(entry, qty) : Array(qty).fill(null),
         });
     }
     return list;
@@ -152,6 +188,9 @@ function makeTemplate(stack, ctx) {
     template.label = stack.name;
     template.profile = stack.profile || null;
     template.type_source = hero ? 'custom' : (resolved?.source ?? 'guess');
+    // Stats belong to the stack, not the look: two Heavy Infantry stacks can take different
+    // armour options, so a remembered profile default never supplies them.
+    Object.assign(template, stackStats(stack));
     return template;
 }
 function baseName(stack, index) {
@@ -249,7 +288,7 @@ export function mergeForce(p, force, {artwork, basing}) {
     }
     const commanderIds = new Set(p.contingents.map(g => g.commander_id).filter(Boolean));
     const names = new Set(p.units.map(u => u.name));
-    const changes = {added: [], removed: [], orphaned: [], created: [], contingentsAdded: [], contingentsRemoved: []};
+    const changes = {added: [], removed: [], orphaned: [], created: [], stats: [], contingentsAdded: [], contingentsRemoved: []};
     const members = [], matched = new Set();
     for (const stack of stacks(force)) {
         let template = matchTemplate(templates, matched, stack.name);
@@ -259,6 +298,13 @@ export function mergeForce(p, force, {artwork, basing}) {
             changes.created.push(template.label);
         }
         matched.add(template.id);
+        // The builder owns the stats, so a re-import follows an armour option added or dropped there.
+        const stats = stackStats(stack), was = {armour: template.armour ?? null, stamina: template.stamina ?? null};
+        for (const key of ['armour', 'stamina']) {
+            if (stats[key] === null || stats[key] === was[key]) continue;
+            template[key] = stats[key];
+            changes.stats.push({template: template.label, stat: key, from: was[key], to: stats[key]});
+        }
         const bases = existing.get(template.id) || [];
         let survivors = bases;
         if (bases.length > stack.qty) {
@@ -316,6 +362,7 @@ export function describeMerge(changes) {
     for (const {template, count} of changes.added) lines.push(`+ ${count} base(s) added to ${template}`);
     for (const {template, names} of changes.removed) lines.push(`− ${names.length} base(s) removed from ${template}: ${names.join(', ')}`);
     for (const label of changes.created) lines.push(`+ new template ${label}`);
+    for (const {template, stat, from, to} of changes.stats) lines.push(`~ ${template} ${stat} ${from ?? 'none'} → ${to}`);
     for (const {template, names} of changes.orphaned) lines.push(`− ${template} is no longer in the builder; its ${names.length} base(s) will be dropped and the template kept`);
     for (const name of changes.contingentsAdded) lines.push(`+ contingent ${name}`);
     for (const name of changes.contingentsRemoved) lines.push(`− contingent ${name}`);
