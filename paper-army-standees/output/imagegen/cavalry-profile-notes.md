@@ -1,0 +1,15 @@
+# Cavalry profiles
+
+Generated with the built-in image generation tool for the Uprights website. Source images are preserved; the browser fits the profiles inside 20 mm panels and mirrors opposite faces when exporting. Geometry and colors are applied by the site, not baked into these assets.
+
+## gondor-lancer-profile
+
+Reference: `gondor-cavalry-clean.png`
+
+Use case: stylized-concept. Reference image is for character equipment, palette and clean simplified ink illustration style only. Create ONE single mounted warrior viewed in STRICT SIDE PROFILE facing LEFT, both rider and mount entirely side-on, orthographic elevation. Complete mount ears, tail and all feet, complete rider and weapon. Compact standing pose, all feet at same baseline, upright short robust weapon close to rider, no forward-pointing lance. Bold clean outlines, flat broad color masses with only two or three large shading shapes, absolutely no texture, mottling, stipple, scratches, tiny detail or hair strands. Intended paper miniature artwork roughly 18 mm wide and 18 mm high, so prioritize a strong recognizable silhouette. Center with clean padding. Genuinely transparent RGBA background, zero alpha outside the subject, no scenery, ground, shadow, base, lettering or borders. NOT a unit, NOT multiple riders, NOT frontal or three-quarter view. ONE Gondor lancer on a chestnut horse in left side profile. Bright cool silver-blue plate and helmet, black cloth, brown leather tack, human skin, a broad black shield with a simple bold white tree. Short upright lance with complete tip, height balanced with horse length. Horse is calm, legs robust and close together, tail close to rear legs.
+
+## orc-warg-profile
+
+Reference: `orc-warg-riders-clean.png`
+
+Use case: stylized-concept. Reference image is for character equipment, palette and clean simplified ink illustration style only. Create ONE single mounted warrior viewed in STRICT SIDE PROFILE facing LEFT, both rider and mount entirely side-on, orthographic elevation. Complete mount ears, tail and all feet, complete rider and weapon. Compact standing pose, all feet at same baseline, upright short robust weapon close to rider, no forward-pointing lance. Bold clean outlines, flat broad color masses with only two or three large shading shapes, absolutely no texture, mottling, stipple, scratches, tiny detail or hair strands. Intended paper miniature artwork roughly 18 mm wide and 18 mm high, so prioritize a strong recognizable silhouette. Center with clean padding. Genuinely transparent RGBA background, zero alpha outside the subject, no scenery, ground, shadow, base, lettering or borders. NOT a unit, NOT multiple riders, NOT frontal or three-quarter view. ONE orc rider on a tawny brown wolf-like warg, both in left side profile. Grassy green skin, cool blue-gray helmet and armor, rust-red cloth, dark brown leather, a simple crude shield with NO tree heraldry. Short upright spear with complete tip. Warg fur indicated only by a few large silhouette tufts and broad smooth planes. Compact calm grounded standing pose, mouth closed or minimally open, paws close together, tail close to hind legs.
