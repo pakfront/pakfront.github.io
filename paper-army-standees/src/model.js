@@ -63,9 +63,10 @@ export function validateSetup(input) {
 // Each pair doubles back at its crest; only flat feet contribute to the base span.
 export function makeStrip(art, setup, copy = 1) {
   const mounted = art.kind === 'Mounted';
-  const width = mounted ? 20 : 40, span = mounted ? 40 : 20;
-  const count = mounted ? setup.riders : setup.ranks;
-  const panelHeight = mounted ? setup.mountedHeight : setup.infantryHeight;
+  const baseWidth = art.baseWidth ?? 40, baseDepth = art.baseDepth ?? 20;
+  const width = mounted ? baseDepth : baseWidth, span = mounted ? baseWidth : baseDepth;
+  const count = art.uprightCount ?? (art.hero ? 1 : mounted ? setup.riders : setup.ranks);
+  const panelHeight = art.panelHeight ?? (mounted ? setup.mountedHeight : setup.infantryHeight);
   const pitch = span / count, sections = [], folds = [];
   let y = 0;
   const add = (kind, height, extra = {}) => { sections.push({kind, y, height, ...extra}); y += height; };
@@ -78,7 +79,7 @@ export function makeStrip(art, setup, copy = 1) {
     folds.push({y, kind: 'valley'});
     add('ground', rank === count - 1 ? pitch / 2 : pitch);
   }
-  return {art, copy, name: art.name, width, height: y, count, span, panelHeight, pitch, sections, folds};
+  return {art, copy, name: art.name, baseWidth, baseDepth, width, height: y, count, span, panelHeight, pitch, sections, folds};
 }
 
 export function layoutSetup(setup) {
@@ -87,7 +88,7 @@ export function layoutSetup(setup) {
   const labels = setup.nameplates ? items.map(strip => ({
     kind: 'nameplate', art: strip.art, copy: strip.copy,
     name: setup.copyNames[strip.art.id]?.[strip.copy - 1] || setup.names[strip.art.id] || strip.art.name,
-    width: 38, height: 4, sections: []
+    width: strip.baseWidth - 2, height: 4, sections: []
   })) : [];
   return {...pack([...items, ...labels], setup), setup, total: items.length, labelTotal: labels.length};
 }

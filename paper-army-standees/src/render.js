@@ -33,7 +33,7 @@ async function panelImage(strip, variant, silhouetteColor = '#cccccc') {
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.scale(big.width / strip.width, big.height / strip.panelHeight);
     let dw = strip.width - 1, dh = strip.panelHeight - 1;
-    if (strip.art.kind === 'Mounted') {
+    if (strip.art.kind === 'Mounted' || strip.art.preserveAspect) {
       const ratio = Math.min(dw / source.width, dh / source.height);
       dw = source.width * ratio; dh = source.height * ratio;
     }
@@ -107,7 +107,7 @@ export function pageScene(layout, index) {
   const text = (value, x, y, size = 2, color = ink) => ops.push({type: 'text', value, x, y, size, color});
   const line = (x, y, x2, y2, color = ink, thickness = .14, dash = []) => ops.push({type: 'line', x, y, x2, y2, color, thickness, dash});
   rect(0, 0, width, height, '#ffffff');
-  text('PAPER ARMY STANDEES / 40 x 20 mm bases', margin, margin + 2, 3);
+  text('PAPER ARMY STANDEES / units 40 x 20 mm; heroes 20 x 20 mm', margin, margin + 2, 3);
   text('Print at 100% / actual size. Cut solid outlines; fold dashed crests and dotted feet.', margin, margin + 6, 2);
   for (const strip of layout.pages[index]) {
     const {x, y, width: w, sections} = strip;
@@ -159,7 +159,7 @@ export async function createPDF(layout, assets, progress = () => {}) {
   const {PDFDocument, StandardFonts, rgb} = globalThis.PDFLib;
   const doc = await PDFDocument.create(), font = await doc.embedFont(StandardFonts.Helvetica);
   doc.setTitle('Paper Army Standees'); doc.setCreator('Paper Army Standees workshop');
-  doc.setSubject('40 x 20 mm bases. Print at 100 percent / actual size.');
+  doc.setSubject('Units 40 x 20 mm; heroes 20 x 20 mm. Print at 100 percent / actual size.');
   const point = 72 / 25.4, embedded = new Map();
   const color = hex => rgb(...[1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255));
   for (let i = 0; i < layout.pages.length; i++) {
