@@ -1,0 +1,22 @@
+*{box-sizing:border-box}body{margin:0;background:#eae7df;color:#292d2a;font:14px system-ui,sans-serif}header{height:92px;background:#24352f;color:#f4f0e4;padding:18px 26px;display:flex;align-items:center;justify-content:space-between}small{font-size:10px;letter-spacing:3px;color:#bac8b8}h1{margin:4px 0;font:28px Georgia,serif}h1 span{font:14px system-ui;color:#bac8b8;margin-left:14px}main{display:grid;grid-template-columns:240px minmax(300px,1fr) 250px;height:calc(100vh - 92px)}aside{padding:18px;overflow:auto;background:#f8f6ef;border-right:1px solid #d5d2c8}h2{font:18px Georgia;margin:8px 0 16px}label{display:block;font-size:12px;margin:12px 0;color:#535a52}input,select,textarea{width:100%;margin-top:5px;border:1px solid #cbcfc4;border-radius:4px;background:#fffdf7;padding:8px;color:#292d2a}textarea{height:60px;resize:vertical}button,.button{border:1px solid #c3c8bc;border-radius:4px;background:#fffdf7;color:#334339;padding:8px 10px;cursor:pointer;font:12px system-ui}button:hover,.button:hover{background:#e8eddf}aside button{width:100%;margin:3px 0}.primary,button.active{background:#334e3f;color:white;border-color:#334e3f}.actions{display:flex;gap:8px}.actions label{margin:0}.button input{display:none}.workspace{display:flex;flex-direction:column;min-width:0;padding:14px}nav{display:flex;gap:5px;flex-wrap:wrap;padding-bottom:10px}.mapbar,footer{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:#536052;padding:8px 0}.mapbar button{padding:5px}#viewport{flex:1;min-height:200px;background:#c9c9bb;overflow:hidden;border:1px solid #9da491;border-radius:5px;touch-action:none}#map{width:100%;height:100%;user-select:none}svg text{font-family:Georgia,serif;paint-order:stroke;stroke:#fff6dc;stroke-width:3px;stroke-linejoin:round;fill:#202820;font-size:15px}.hint{font-size:11px;line-height:1.6;color:#697063}.check{display:flex;gap:7px;align-items:center}.check input{width:auto;margin:0}#roster button{text-align:left}footer{font-size:10px}@media(max-width:1050px){main{grid-template-columns:200px minmax(300px,1fr)}main>aside:last-child{grid-column:1/-1}header{height:auto}main{height:auto}.workspace{height:75vh}.actions{flex-wrap:wrap}}
+ #calibration{background:#fff5d9;border:1px solid #cfb777;border-radius:4px;padding:10px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}#calibration[hidden]{display:none}#calibration label{margin:0}#calibration input{width:140px}#calibrationMessage{font-size:12px}
+html[data-theme="dark"]{color-scheme:dark}
+html[data-theme="light"]{color-scheme:light}
+html[data-theme="dark"] body{background:#161e1b;color:#e5e9df}
+html[data-theme="dark"] header{background:#101a15}
+html[data-theme="dark"] aside{background:#202a24;border-color:#3c4940}
+html[data-theme="dark"] label,html[data-theme="dark"] .mapbar,html[data-theme="dark"] footer{color:#c1cdbd}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{background:#141d18;border-color:#526153;color:#edf0e6}
+html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::placeholder{color:#9ea99c}
+html[data-theme="dark"] button,html[data-theme="dark"] .button{background:#2c3930;color:#e5eadd;border-color:#586753}
+html[data-theme="dark"] button:hover,html[data-theme="dark"] .button:hover{background:#3b4b3e}
+html[data-theme="dark"] .primary,html[data-theme="dark"] button.active{background:#47644d;border-color:#7e9d73;color:#fff}
+html[data-theme="dark"] .hint{color:#b0beaa}
+html[data-theme="dark"] #viewport{background:#111713;border-color:#56634f}
+html[data-theme="dark"] #calibration{background:#343122;border-color:#a18e52;color:#f1e8c8}
+button:focus-visible,.button:focus-within,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #b6a55b;outline-offset:2px}
+button:disabled{opacity:.5;cursor:default}
+ #routeOptions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px;margin-bottom:10px;border:1px solid #9da491;border-radius:4px}#routeOptions[hidden]{display:none}#routeOptions label{margin:0}#routeSpeed{width:110px}#routeSpeedMessage{font-size:12px}
+
+.all-tools{display:block;width:fit-content;margin-bottom:6px;color:#bac8b8;font:12px system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px}
+.all-tools:focus-visible{outline:2px solid currentColor;outline-offset:3px}
