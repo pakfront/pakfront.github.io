@@ -23,6 +23,3 @@
 }
 @media(min-width:951px) and (max-height:649px){.preview-column{position:static}.sheet-stage{max-height:180px}.print-options{max-height:420px}}
 @media(max-width:950px){.print-options{max-height:min(65dvh,560px)}}
-
-.all-tools{display:block;width:fit-content;margin-bottom:6px;color:var(--muted);font:12px system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px}
-.all-tools:focus-visible{outline:2px solid currentColor;outline-offset:3px}

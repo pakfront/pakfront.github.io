@@ -33,7 +33,9 @@ async function panelImage(strip, variant, silhouetteColor = '#cccccc') {
     const big = makeCanvas(w * 2, h * 2), ctx = big.getContext('2d');
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.scale(big.width / strip.width, big.height / strip.panelHeight);
-    let dw = strip.width - 1, dh = strip.panelHeight - 1;
+    // Deeper mounted bases add padding, not larger horses or riders.
+    const artworkWidth = strip.art.kind === 'Mounted' ? Math.min(20, strip.width) : strip.width;
+    let dw = artworkWidth - 1, dh = strip.panelHeight - 1;
     if (strip.art.kind === 'Mounted' || strip.art.preserveAspect) {
       const ratio = Math.min(dw / source.width, dh / source.height);
       dw = source.width * ratio; dh = source.height * ratio;
@@ -224,36 +226,20 @@ export function pageScene(layout, index) {
         line(ax, ay, bx, by, '#ffffff', .35, [1.2, .8]);
         line(ax, ay, bx, by, '#8f6333', .15, [1.2, .8]);
       };
-      if (strip.art.kind === 'Mounted') {
-        line(x, y, x + w, y, '#59645c');
-        line(x, y + strip.height, x + w, y + strip.height, '#59645c');
-        for (const section of sections) if (section.kind === 'face') {
-          line(x, y + section.y, x, y + section.y + section.height, '#59645c');
-          line(x + w, y + section.y, x + w, y + section.y + section.height, '#59645c');
-        }
-        for (const tab of strip.wrapTabs) {
-          const tx = netX + tab.x, ty = y + tab.y, front = tab.edge === 'front';
-          rect(tx, ty, tab.width, tab.height, setup.groundColor);
-          line(tx, ty, tx + 10, ty, '#59645c');
-          line(tx + (front ? 0 : 10), ty, tx + (front ? 0 : 10), ty + tab.height, '#59645c');
-          line(tx + 10, ty + tab.height, tx, ty + tab.height, '#59645c');
-          guide(tx + (front ? 10 : 0), ty, tx + (front ? 10 : 0), ty + tab.height);
-          guide(tx + (front ? 7 : 3), ty, tx + (front ? 7 : 3), ty + tab.height);
-        }
-      } else {
-        for (const tab of strip.wrapTabs) {
-          const ty = y + tab.y, front = tab.edge === 'front';
-          rect(x, ty, w, 10, setup.groundColor);
+      for (const tab of strip.wrapTabs) {
+        const ty = y + tab.y, front = tab.edge === 'front';
+        rect(x, ty, w, tab.height, setup.groundColor);
+        if (strip.art.kind !== 'Mounted') {
           const bandY = ty + (front ? 7 : 0);
           rect(x, bandY, w, 3, '#ffffff');
           const {size, textWidth} = fittedLabel({art: strip.art, copy: strip.copy, name: strip.labelName, width: w}, 6);
           text(strip.labelName, x + w / 2 + (front ? textWidth / 2 : -textWidth / 2),
             bandY + 1.5 + (front ? -1 : 1) * size * .35, size, '#000000', front ? 180 : 0);
-          guide(x, ty + (front ? 10 : 0), x + w, ty + (front ? 10 : 0));
-          guide(x, ty + (front ? 7 : 3), x + w, ty + (front ? 7 : 3));
         }
-        rect(x, y, w, strip.height, null, '#59645c');
+        guide(x, ty + (front ? 10 : 0), x + w, ty + (front ? 10 : 0));
+        guide(x, ty + (front ? 7 : 3), x + w, ty + (front ? 7 : 3));
       }
+      rect(x, y, w, strip.height, null, '#59645c');
     }
   }
   const rulerY = height - margin - 4;
