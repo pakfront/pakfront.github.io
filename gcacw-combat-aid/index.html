@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#24372d">
+  <meta name="description" content="A table-ready GCACW combat modifier worksheet with a visual flanking hex helper.">
+  <title>GCACW Combat Aid</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4 56 18v28L32 60 8 46V18z' fill='%23d7c29a' stroke='%2324372d' stroke-width='5'/%3E%3Cpath d='M21 31h22M32 20v24' stroke='%238a2e2e' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Great Campaigns of the American Civil War</p>
+      <h1>Combat Aid</h1>
+    </div>
+    <button class="button button-quiet" id="reset-all" type="button">Reset worksheet</button>
+  </header>
+
+  <nav class="tabs" aria-label="Combat aid tools">
+    <button class="tab is-active" type="button" role="tab" aria-selected="true" aria-controls="combat-panel" id="combat-tab" data-tab="combat">Combat worksheet</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="flank-panel" id="flank-tab" data-tab="flank">Flanking diagram <span class="tab-count" id="flank-tab-count">0</span></button>
+  </nav>
+
+  <main>
+    <section class="tab-panel is-active" id="combat-panel" role="tabpanel" aria-labelledby="combat-tab">
+      <div class="result-strip" aria-live="polite">
+        <div class="result-main">
+          <span class="result-label">Final attacker DRM</span>
+          <strong id="final-drm">+0</strong>
+        </div>
+        <div class="result-stat"><span>Combat ratio</span><b id="combat-ratio">1:1</b></div>
+        <div class="result-stat"><span>Artillery difference</span><b id="artillery-diff">0</b></div>
+        <div class="result-stat"><span>Flank DRM</span><b id="flank-drm-summary">+0</b></div>
+      </div>
+
+      <div class="workspace-grid">
+        <div class="stack">
+          <section class="card force-card attacker-card">
+            <div class="card-heading">
+              <div><span class="side-tag">Attacker</span><h2>Attacking force</h2></div>
+              <div class="force-total"><span>Modified CV</span><b id="attacker-cv">8</b></div>
+            </div>
+            <div class="field-grid compact-grid">
+              <label>Tactics<input id="attacker-tactics" type="number" step="1" value="2"></label>
+              <label>Attack type<select id="attack-type"></select></label>
+              <label>Infantry CV<input id="attacker-inf" type="number" min="0" step="0.5" value="8"></label>
+              <label>Cavalry CV<input id="attacker-cav" type="number" min="0" step="0.5" value="0"></label>
+              <label>Artillery<input id="attacker-art" type="number" min="0" step="0.5" value="1"></label>
+              <label>Multiplier<input id="attacker-mult" type="number" min="0" step="0.5" value="1"></label>
+            </div>
+            <div class="inline-results"><span>Modified artillery <b id="attacker-art-mod">1</b></span><span>Cavalry / total <b id="attacker-cav-ratio">0%</b></span></div>
+          </section>
+
+          <section class="card force-card defender-card">
+            <div class="card-heading">
+              <div><span class="side-tag">Defender</span><h2>Defending force</h2></div>
+              <div class="force-total"><span>Modified CV</span><b id="defender-cv">4</b></div>
+            </div>
+            <div class="field-grid defender-basics">
+              <label>Tactics<input id="defender-tactics" type="number" step="1" value="2"></label>
+              <label>Hex terrain<select id="defender-terrain"></select></label>
+              <label>Attacked hexside<select id="defender-hexside"></select></label>
+              <label class="check-field"><input id="redoubt" type="checkbox"><span>In redoubt <small>×1.5</small></span></label>
+            </div>
+            <div class="unit-table" role="group" aria-label="Defender combat values by entrenchment">
+              <div class="unit-row unit-head"><span>Entrenchment</span><span>Inf CV</span><span>Cav CV</span><span>Art</span><span>×</span></div>
+              <div id="defender-rows"></div>
+            </div>
+            <div class="inline-results"><span>Modified artillery <b id="defender-art-mod">2</b></span><span>Cavalry / total <b id="defender-cav-ratio">0%</b></span></div>
+          </section>
+        </div>
+
+        <aside class="stack">
+          <section class="card">
+            <div class="card-heading"><div><span class="section-number">01</span><h2>Core modifiers</h2></div></div>
+            <div class="modifier-list">
+              <div><span>Tactics difference</span><b id="mod-tactics">0</b></div>
+              <div><span>Combat ratio modifier</span><b id="mod-ratio">0</b></div>
+              <div class="modifier-control">
+                <span>Artillery result <small id="artillery-table-note">Table: −2</small></span>
+                <select id="artillery-resolved" aria-label="Resolved artillery modifier"></select>
+              </div>
+              <div><span>Attack type</span><b id="mod-attack-type">0</b></div>
+            </div>
+          </section>
+
+          <section class="card flank-compact">
+            <div class="card-heading"><div><span class="section-number">02</span><h2>Flank</h2></div><button class="text-button" type="button" data-open-flank>Edit diagram</button></div>
+            <div class="flank-meter"><div id="flank-meter-fill"></div></div>
+            <p><b id="flank-count">0</b> of 6 adjacent hexes covered after ZOC and terrain checks</p>
+            <div class="field-grid two-col">
+              <label>Automatic reductions<input id="flank-removed" type="number" min="0" max="3" step="1" value="0"></label>
+              <label class="check-field"><input id="cav-adjusted" type="checkbox"><span>Active attacker is cavalry</span></label>
+              <label class="check-field"><input id="flanks-refused" type="checkbox"><span>Flanks refused</span></label>
+              <div class="mini-result"><span>Final flank</span><b id="final-flank">+0</b></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-heading"><div><span class="section-number">03</span><h2>Other modifiers</h2></div></div>
+            <div class="field-grid two-col modifier-fields">
+              <label>Rain<select id="rain-mod"></select></label>
+              <label>Other attacker<input id="other-attacker" type="number" step="1" value="0"></label>
+              <label>Bridge / dam / ferry / ford<select id="water-crossing-mod"></select></label>
+              <label>Creek<select id="creek-mod"></select></label>
+              <label>Uphill across ridge / bluff<select id="ridge-mod"></select></label>
+              <label>Uphill into hill<select id="hill-mod"></select></label>
+              <label>Defender in mountain<select id="mountain-mod"></select></label>
+              <label>½ demoralized CV<select id="demoralized-mod"></select></label>
+              <label class="wide-field">Other defender<input id="other-defender" type="number" step="1" value="0"></label>
+            </div>
+            <p class="rule-note">Creek may be −2 in rain. Hill and mountain exceptions still require rules judgment.</p>
+          </section>
+        </aside>
+      </div>
+
+      <details class="reference-card">
+        <summary>Artillery modifier table</summary>
+        <div class="table-wrap"><table id="artillery-table"></table></div>
+        <p>* Resolve by die roll, then enter the result above.</p>
+      </details>
+    </section>
+
+    <section class="tab-panel" id="flank-panel" role="tabpanel" aria-labelledby="flank-tab" hidden>
+      <section class="card flank-conditions">
+        <div class="card-heading"><div><span class="section-number">Conditions</span><h2>ZOC and flank conditions</h2></div></div>
+        <div class="field-grid four-col">
+          <label class="check-field"><input type="checkbox" id="rain-turn"><span>Rain turn</span></label>
+          <label class="check-field"><input type="checkbox" id="rivers-unfordable"><span>Rivers unfordable</span></label>
+          <div class="threshold-readout"><span>Defender modified CV</span><b id="flank-defender-cv">4</b></div>
+          <div class="threshold-readout"><span>Coverage threshold (¼)</span><b id="flank-threshold">1</b></div>
+        </div>
+      </section>
+      <div class="flank-layout">
+        <section class="card map-card">
+          <div class="card-heading">
+            <div><span class="section-number">Hex ring</span><h2>Choose a hex to edit</h2></div>
+            <div class="legend"><span><i class="dot attacker-dot"></i>Attacker</span><span><i class="dot defender-dot"></i>Defender</span></div>
+          </div>
+          <div class="hex-map" id="hex-map" aria-label="Center defender hex and six adjacent editable hexes"></div>
+          <div class="hexside-key" aria-label="Hexside colors">
+            <span><i class="edge-swatch woods-edge"></i>Woods</span><span><i class="edge-swatch loess-edge"></i>Loess</span><span><i class="edge-swatch creek-edge"></i>Creek</span><span><i class="edge-swatch minor-river-edge"></i>Minor river</span><span><i class="edge-swatch major-river-edge"></i>Major river</span><span><i class="edge-swatch water-edge"></i>All-water</span>
+          </div>
+          <p class="map-hint">Each outer unit projects ZOC into its two neighboring outer hexes. Edit the center-facing hexside and the clockwise ring hexside for every outer hex.</p>
+        </section>
+
+        <aside class="stack">
+          <section class="card hex-editor">
+            <div class="card-heading"><div><span class="section-number" id="hex-position-label">North</span><h2 id="hex-editor-title">Edit adjacent hex</h2></div></div>
+            <div id="outer-hex-editor">
+              <div class="segmented" role="group" aria-label="Hex occupancy">
+                <button type="button" data-occupancy="empty">Empty</button>
+                <button type="button" data-occupancy="attacker">Attacker</button>
+                <button type="button" data-occupancy="defender">Defender</button>
+                <button type="button" data-occupancy="offmap">Off map</button>
+              </div>
+              <div class="field-grid">
+                <label>Hex terrain<select id="hex-terrain"></select></label>
+                <label>Unit Combat Value<input type="number" min="0" step="0.5" id="hex-unit-cv" value="2"></label>
+                <label class="check-field"><input type="checkbox" id="hex-demoralized"><span>Unit demoralized</span></label>
+                <label class="check-field"><input type="checkbox" id="hex-primary"><span>Primary attack hex</span></label>
+              </div>
+              <h3 class="editor-subhead">Hexside toward defender</h3>
+              <div class="field-grid">
+                <label>Hexside feature<select id="hex-center-barrier"></select></label>
+                <label>Crossing / route<select id="hex-center-crossing"></select></label>
+              </div>
+              <h3 class="editor-subhead">Clockwise ring connection</h3>
+              <div class="field-grid">
+                <label>Hexside feature<select id="hex-ring-barrier"></select></label>
+                <label>Crossing / route<select id="hex-ring-crossing"></select></label>
+              </div>
+              <h3 class="editor-subhead">ZOC from outside the diagram</h3>
+              <div class="field-grid">
+                <label>External ZOC<select id="hex-external-zoc"></select></label>
+                <label>Contributing CV<input type="number" min="0" step="0.5" id="hex-external-cv" value="0"></label>
+              </div>
+              <div class="hex-ruling" id="hex-ruling"></div>
+            </div>
+            <div id="center-hex-editor" hidden>
+              <label>Defender hex terrain<select id="center-terrain"></select></label>
+              <p class="rule-note">This selection is shared with the combat worksheet.</p>
+            </div>
+          </section>
+
+          <section class="card flank-result-card">
+            <span class="result-label">Visual flank result</span>
+            <strong id="visual-flank-result">+0</strong>
+            <div class="flank-breakdown" id="flank-breakdown"></div>
+            <button class="button" type="button" data-open-combat>Return to combat worksheet</button>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer>Selections are saved on this device. Rules judgments remain with the players.</footer>
+  <script src="flank-rules.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
