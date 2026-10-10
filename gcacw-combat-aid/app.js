@@ -25,7 +25,89 @@ const defaults = {
   modifiers:{ artilleryResolved:0, rain:0, otherAttacker:0, water:0, creek:0, ridge:0, hill:0, mountain:0, demoralized:0, otherDefender:0, activeAttackerCavalry:false, flanksRefused:false },
   flankConditions:{ rain:false, riversUnfordable:false }, hexes:POSITION_NAMES.map(blankHex), selectedHex:0
 };
-let state = loadState();
+let shareNotice = "";
+let state = loadSharedState() || loadState();
+
+// Version 1 uses the defaults' fixed field order, omitting repeated JSON keys.
+function shareChoices(key,template){
+  return ({type:Object.keys(ATTACK_TYPES),terrain:template==="Clear"?TERRAIN:MAP_TERRAIN,
+    mapTerrain:MAP_TERRAIN,hexside:HEXSIDES,occupancy:["empty","attacker","defender","offmap"],
+    barrier:BARRIERS,crossing:CROSSINGS,externalZoc:["none","normal","restricted"]})[key];
+}
+function packShared(value,template=defaults,key=""){
+  if(template && typeof template==="object") return Object.keys(template).flatMap(k=>packShared(value[k],template[k],k));
+  if(typeof template==="string") return [shareChoices(key,template).indexOf(value)];
+  return [typeof template==="boolean"?Number(value):value];
+}
+function unpackShared(values){
+  let index=0;
+  function read(template,key=""){
+    if(template && typeof template==="object"){
+      const result=Array.isArray(template)?[]:{};
+      for(const k of Object.keys(template)) result[k]=read(template[k],k);
+      return result;
+    }
+    const value=values[index++];
+    if(typeof value!=="number" || !Number.isFinite(value)) throw Error("Invalid value");
+    if(typeof template==="string"){
+      const choices=shareChoices(key,template);
+      if(!Number.isInteger(value)||value<0||value>=choices.length) throw Error("Invalid choice");
+      return choices[value];
+    }
+    if(typeof template==="boolean"){
+      if(value!==0&&value!==1) throw Error("Invalid flag");
+      return !!value;
+    }
+    if(key==="selectedHex"){
+      if(!Number.isInteger(value)||value<0||value>6) throw Error("Invalid hex");
+      return value===6?"center":value;
+    }
+    return value;
+  }
+  if(!Array.isArray(values)) throw Error("Invalid worksheet");
+  const result=read(defaults);
+  if(index!==values.length) throw Error("Invalid worksheet length");
+  return result;
+}
+function encodeSharedState(snapshot){
+  const values=packShared({...snapshot,selectedHex:snapshot.selectedHex==="center"?6:snapshot.selectedHex});
+  return "1."+btoa(JSON.stringify(values)).replaceAll("+","-").replaceAll("/","_").replace(/=+$/,"");
+}
+function decodeSharedState(encoded){
+  if(encoded.length>12000||!/^1\.[A-Za-z0-9_-]+$/.test(encoded)) throw Error("Unsupported share link");
+  const data=encoded.slice(2).replaceAll("-","+").replaceAll("_","/");
+  return unpackShared(JSON.parse(atob(data)));
+}
+function loadSharedState(){
+  const encoded=new URLSearchParams(location.hash.slice(1)).get("state");
+  if(encoded===null) return null;
+  try {
+    const shared=decodeSharedState(encoded);
+    shareNotice="Shared worksheet loaded. You can edit it and share a new link.";
+    return shared;
+  } catch {
+    shareNotice="This share link is invalid or from an unsupported version. Your saved worksheet was loaded instead.";
+    return null;
+  }
+}
+function openShareDialog(){
+  const url=new URL(location.href);
+  url.hash="state="+encodeSharedState(state);
+  get("share-url").value=url.href;
+  const local=location.protocol==="file:"||["localhost","127.0.0.1","[::1]"].includes(location.hostname);
+  get("share-status").textContent=local?"For a link other players can open, use Share worksheet on the hosted website.":"Copy the link and paste it into Discord or another chat.";
+  get("share-dialog").showModal();
+  get("share-url").select();
+}
+async function copyShareLink(){
+  try {
+    await navigator.clipboard.writeText(get("share-url").value);
+    get("share-status").textContent="Link copied.";
+  } catch {
+    get("share-url").focus(); get("share-url").select();
+    get("share-status").textContent="Select and copy the link above (Ctrl+C or ⌘C).";
+  }
+}
 
 function clone(value){ return JSON.parse(JSON.stringify(value)); }
 function n(value){ const x=Number(value); return Number.isFinite(x)?x:0; }
@@ -36,7 +118,7 @@ function get(id){ return document.getElementById(id); }
 function setValue(id,value){ if(get(id)) get(id).value=value; }
 function setChecked(id,value){ if(get(id)) get(id).checked=!!value; }
 function setOptions(id,values,selected,label=x=>x){ const el=get(id); el.innerHTML=values.map(v=>`<option value="${v}"${String(v)===String(selected)?" selected":""}>${label(v)}</option>`).join(""); }
-function saveState(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }
+function saveState(){ try { localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); } catch {} }
 function loadState(){
   try {
     const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -143,7 +225,7 @@ function renderHexsideLayer(){
 }
 function renderHexes(c=calculate()){
   const selected=state.selectedHex,map=get("hex-map"),evaluations=c.flank.evaluations;
-  map.innerHTML=renderHexsideLayer()+state.hexes.map((h,i)=>{ const e=evaluations[i]; return `<button type="button" class="hex ${h.occupancy} ${e.covered?"covered":""} ${e.reduction&&c.flank.basic?"reduction":""} ${h.primary?"primary":""} ${selected===i?"is-selected":""}" data-index="${i}" aria-label="${POSITION_NAMES[i]}: ${e.covered?"covered":"not covered"}${e.reduction?", reduction":""}"><span class="hex-inner"><span class="hex-role">${h.occupancy==="offmap"?"Off map":h.occupancy}</span><span class="hex-detail">${MAP_TERRAIN_LABELS[h.terrain]}</span><span class="hex-edge">${e.covered?"COVERED":"OPEN"}${e.reduction&&c.flank.basic?" · −1":""}</span></span></button>`; }).join("")+`<button type="button" class="hex center ${selected==="center"?"is-selected":""}" data-index="center" aria-label="Center defender hex"><span class="hex-inner"><span class="hex-role">Defender</span><span class="hex-detail">${MAP_TERRAIN_LABELS[state.defender.mapTerrain]}</span></span></button>`;
+  map.innerHTML=renderHexsideLayer()+state.hexes.map((h,i)=>{ const e=evaluations[i]; return `<button type="button" class="hex ${h.occupancy} ${e.covered?"covered":""} ${e.reduction&&c.flank.basic?"reduction":""} ${h.primary?"primary":""} ${selected===i?"is-selected":""}" data-index="${i}" data-terrain="${h.terrain}" aria-label="${POSITION_NAMES[i]}: ${e.covered?"covered":"not covered"}${e.reduction?", reduction":""}"><span class="hex-inner"><span class="hex-role">${h.occupancy==="offmap"?"Off map":h.occupancy}</span><span class="hex-detail">${MAP_TERRAIN_LABELS[h.terrain]}</span><span class="hex-edge">${e.covered?"COVERED":"OPEN"}${e.reduction&&c.flank.basic?" · −1":""}</span></span></button>`; }).join("")+`<button type="button" class="hex center ${selected==="center"?"is-selected":""}" data-index="center" data-terrain="${state.defender.mapTerrain}" aria-label="Center defender hex"><span class="hex-inner"><span class="hex-role">Defender</span><span class="hex-detail">${MAP_TERRAIN_LABELS[state.defender.mapTerrain]}</span></span></button>`;
   map.querySelectorAll(".hex").forEach(btn=>btn.addEventListener("click",()=>selectHex(btn.dataset.index==="center"?"center":Number(btn.dataset.index))));
   const center=selected==="center"; get("outer-hex-editor").hidden=center; get("center-hex-editor").hidden=!center; get("hex-position-label").textContent=center?"Center":POSITION_NAMES[selected]; get("hex-editor-title").textContent=center?"Edit defending hex":"Edit adjacent hex";
   if(!center){
@@ -160,6 +242,8 @@ function switchTab(name){ document.querySelectorAll(".tab").forEach(t=>{const ac
 function updatePrimary(hex){ if(hex.primary){ state.defender.hexside=primaryHexside(hex); setValue("defender-hexside",state.defender.hexside); } }
 
 function bind(){
+  get("share-state").addEventListener("click",openShareDialog);
+  get("copy-share").addEventListener("click",copyShareLink);
   const bindings={"attacker-tactics":["attacker","tactics"],"attack-type":["attacker","type"],"attacker-inf":["attacker","inf"],"attacker-cav":["attacker","cav"],"attacker-art":["attacker","art"],"attacker-mult":["attacker","mult"],"defender-tactics":["defender","tactics"],"defender-terrain":["defender","terrain"],"defender-hexside":["defender","hexside"],"artillery-resolved":["modifiers","artilleryResolved"],"rain-mod":["modifiers","rain"],"other-attacker":["modifiers","otherAttacker"],"water-crossing-mod":["modifiers","water"],"creek-mod":["modifiers","creek"],"ridge-mod":["modifiers","ridge"],"hill-mod":["modifiers","hill"],"mountain-mod":["modifiers","mountain"],"demoralized-mod":["modifiers","demoralized"],"other-defender":["modifiers","otherDefender"]};
   Object.entries(bindings).forEach(([id,path])=>get(id).addEventListener("input",e=>{ state[path[0]][path[1]]=e.target.type==="number"||(e.target.tagName==="SELECT"&&/^-?\d/.test(e.target.value))?n(e.target.value):e.target.value; if(id==="defender-terrain"){state.defender.mapTerrain=combatToMapTerrain(e.target.value);setValue("center-terrain",state.defender.mapTerrain);} if(id==="rain-mod"){state.flankConditions.rain=n(e.target.value)!==0;setChecked("rain-turn",state.flankConditions.rain);} render(); }));
   [["redoubt","redoubt","defender"],["cav-adjusted","activeAttackerCavalry","modifiers"],["flanks-refused","flanksRefused","modifiers"]].forEach(([id,key,group])=>get(id).addEventListener("change",e=>{state[group][key]=e.target.checked;render();}));
@@ -181,3 +265,4 @@ function registerWebMCP(){
 }
 
 buildInputs(); bind(); render(); registerWebMCP();
+if(shareNotice){ get("share-notice").textContent=shareNotice; get("share-notice").hidden=false; }

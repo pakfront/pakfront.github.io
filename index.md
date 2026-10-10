@@ -10,7 +10,7 @@ Calculate combat modifiers for Great Campaigns of the American Civil War, with a
 
 ### [Kriegsspiel Map Room](kriegsspiel-map-room/)
 
-Manage battlefield truth and commander views, then export player maps. A desktop umpire tool.
+Manage battlefield truth and commander views, then export player maps. A desktop umpire tool, currently early stage development.
 
 ### [Paper Army Standees](paper-army-standees/)
 

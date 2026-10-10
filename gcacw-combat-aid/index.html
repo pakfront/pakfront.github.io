@@ -12,12 +12,26 @@
 <body>
   <header class="app-header">
     <div>
-      <a class="all-tools" href="../">All tools</a>
       <p class="eyebrow">Great Campaigns of the American Civil War</p>
       <h1>Combat Aid</h1>
     </div>
-    <button class="button button-quiet" id="reset-all" type="button">Reset worksheet</button>
+    <div class="header-actions">
+      <button class="button button-quiet" id="share-state" type="button">Share worksheet</button>
+      <button class="button button-quiet" id="reset-all" type="button">Reset worksheet</button>
+    </div>
   </header>
+
+  <p id="share-notice" class="share-notice" role="status" hidden></p>
+  <dialog id="share-dialog" aria-labelledby="share-title">
+    <h2 id="share-title">Share worksheet</h2>
+    <p>Send this link to another player to open the same combat values and flank diagram.</p>
+    <label>Share link<input id="share-url" type="text" readonly></label>
+    <p id="share-status" role="status"></p>
+    <div class="header-actions">
+      <button class="button" id="copy-share" type="button">Copy link</button>
+      <form method="dialog"><button class="button" type="submit">Close</button></form>
+    </div>
+  </dialog>
 
   <nav class="tabs" aria-label="Combat aid tools">
     <button class="tab is-active" type="button" role="tab" aria-selected="true" aria-controls="combat-panel" id="combat-tab" data-tab="combat">Combat worksheet</button>
@@ -110,7 +124,7 @@
               <label>Uphill into hill<select id="hill-mod"></select></label>
               <label>Defender in mountain<select id="mountain-mod"></select></label>
               <label>½ demoralized CV<select id="demoralized-mod"></select></label>
-              <label class="wide-field">Other defender<input id="other-defender" type="number" step="1" value="0"></label>
+              <label class="wide-field">Other<input id="other-defender" type="number" step="1" value="0"></label>
             </div>
             <p class="rule-note">Creek may be −2 in rain. Hill and mountain exceptions still require rules judgment.</p>
           </section>

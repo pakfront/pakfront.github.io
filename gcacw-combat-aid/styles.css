@@ -17,8 +17,6 @@
 }
 
 * { box-sizing: border-box; }
-.all-tools { display: block; width: fit-content; margin-bottom: 6px; color: #d8c99f; font: 12px system-ui, sans-serif; text-decoration: underline; text-underline-offset: 3px; }
-.all-tools:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 body { margin: 0; color: var(--ink); background: var(--paper); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.45; }
 button, input, select { font: inherit; }
 button, select, input[type="checkbox"] { cursor: pointer; }
@@ -93,6 +91,12 @@ input[type="number"], select { width: 100%; min-height: 42px; padding: 8px 10px;
 .button { min-height: 42px; padding: 9px 15px; color: white; background: var(--green-2); border: 1px solid #1a2f24; border-radius: 4px; font-weight: 750; }
 .button:hover { background: var(--green); }
 .button-quiet { color: #f5ecd6; background: transparent; border-color: rgba(255,255,255,.42); }
+.header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.share-notice { margin: 12px 16px; color: var(--ink); }
+#share-dialog { width: min(560px, calc(100% - 32px)); padding: 24px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 6px; }
+#share-dialog::backdrop { background: rgba(0,0,0,.4); }
+#share-dialog p { font-size: .9rem; }
+#share-url { width: 100%; }
 .text-button { padding: 2px; color: var(--blue); background: none; border: 0; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
 .reference-card { margin-top: 18px; overflow: hidden; }
 .reference-card summary { padding: 15px 20px; cursor: pointer; font-weight: 800; }
@@ -141,11 +145,16 @@ th:first-child, td:first-child { text-align: left; }
 .hex-inner { width: 100%; height: 100%; padding: 10px; display: grid; place-items: center; align-content: center; gap: 3px; clip-path: inherit; color: var(--ink); background: #d9d1bc; text-align: center; }
 .hex .hex-role { font-weight: 900; font-size: .8rem; text-transform: uppercase; }
 .hex .hex-detail { max-width: 100%; color: #3b463e; font-size: .67rem; line-height: 1.2; }
-.hex .hex-edge { max-width: 90%; margin-top: 3px; padding: 1px 5px; color: white; background: rgba(30,40,34,.7); border-radius: 2px; font-size: .62rem; }
-.hex.empty .hex-inner { background: #ddd7c7; color: #72756f; }
-.hex.attacker .hex-inner { background: var(--red-soft); }
+.hex .hex-edge { max-width: 90%; margin-top: 3px; padding: 1px 5px; color: #000; background: #e0e0e0; border-radius: 2px; font-size: .62rem; }
+.hex[data-terrain="clear"] .hex-inner { background: #eee4bc; }
+.hex[data-terrain="rolling"] .hex-inner { background: #d6dfa7; }
+.hex[data-terrain="woods"] .hex-inner { background: #a8c6a1; }
+.hex[data-terrain="loess"] .hex-inner { background: #e6c48e; }
+.hex[data-terrain="hill"] .hex-inner { background: #d1b49a; }
+.hex[data-terrain="mountain"] .hex-inner { background: #bfc1c7; }
+.hex[data-terrain="swamp"] .hex-inner { background: #a9cfc8; }
+.hex[data-terrain="provisional-swamp"] .hex-inner { background: #c7ded8; }
 .hex.attacker .hex-role { color: var(--red); }
-.hex.defender .hex-inner, .hex.center .hex-inner { background: var(--blue-soft); }
 .hex.defender .hex-role, .hex.center .hex-role { color: var(--blue); }
 .hex.removed .hex-inner { opacity: .58; background-image: repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(80,70,60,.13) 10px, rgba(80,70,60,.13) 18px); }
 .hex.primary::after { content: "PRIMARY"; position: absolute; inset: auto 25% 7%; padding: 2px; color: white; background: var(--red); clip-path: none; font-size: .55rem; font-weight: 900; letter-spacing: .08em; }
@@ -174,6 +183,8 @@ th:first-child, td:first-child { text-align: left; }
 .hex-ruling strong { display: block; margin-bottom: 5px; }
 .hex-ruling ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: .78rem; }
 .hex.covered { background: var(--green-2); }
+.hex.covered .hex-edge { color: #fff; background: #303832; }
+.hex.covered.is-selected { background: var(--gold); }
 .hex.reduction::before { content: "−1"; position: absolute; z-index: 3; top: 13%; right: 18%; width: 25px; height: 25px; display: grid; place-items: center; color: white; background: var(--red); border-radius: 50%; font-size: .68rem; font-weight: 900; }
 .hex.offmap .hex-inner { background: repeating-linear-gradient(135deg, #dad3c2, #dad3c2 9px, #c6bead 9px, #c6bead 17px); }
 .hex.blocked .hex-inner { opacity: .62; }
