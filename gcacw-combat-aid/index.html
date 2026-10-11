@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,15 +7,21 @@
   <meta name="description" content="A table-ready GCACW combat modifier worksheet with a visual flanking hex helper.">
   <title>GCACW Combat Aid</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4 56 18v28L32 60 8 46V18z' fill='%23d7c29a' stroke='%2324372d' stroke-width='5'/%3E%3Cpath d='M21 31h22M32 20v24' stroke='%238a2e2e' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <script>
+    try {
+      if (localStorage.getItem("gcacw-theme") === "light") document.documentElement.dataset.theme = "light";
+    } catch (_) {}
+  </script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="app-header">
     <div>
-      <p class="eyebrow">Great Campaigns of the American Civil War</p>
+      <p class="eyebrow"><a href="https://mmpgamers.com/gcacw-c-14" target="_blank" rel="noopener noreferrer">Great Campaigns of the American Civil War ↗</a></p>
       <h1>Combat Aid</h1>
     </div>
     <div class="header-actions">
+      <button class="button button-quiet" id="theme-toggle" type="button" aria-pressed="true">Dark mode</button>
       <button class="button button-quiet" id="share-state" type="button">Share worksheet</button>
       <button class="button button-quiet" id="reset-all" type="button">Reset worksheet</button>
     </div>
@@ -36,6 +42,7 @@
   <nav class="tabs" aria-label="Combat aid tools">
     <button class="tab is-active" type="button" role="tab" aria-selected="true" aria-controls="combat-panel" id="combat-tab" data-tab="combat">Combat worksheet</button>
     <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="flank-panel" id="flank-tab" data-tab="flank">Flanking diagram <span class="tab-count" id="flank-tab-count">0</span></button>
+    <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="movement-panel" id="movement-tab" data-tab="movement">Movement</button>
   </nav>
 
   <main>
@@ -209,10 +216,61 @@
         </aside>
       </div>
     </section>
+
+    <section class="tab-panel" id="movement-panel" role="tabpanel" aria-labelledby="movement-tab" hidden>
+      <div class="movement-heading"><div><h2>Movement &amp; march</h2><p class="rule-note">Calculate one unit’s march or its allowance during a leader activation. Enter actual die rolls below.</p></div><button class="button" id="move-reset" type="button">Reset movement</button></div>
+      <div class="result-strip" aria-live="polite">
+        <div class="result-main"><span class="result-label">Final movement MP</span><strong id="move-total">—</strong></div>
+        <div class="result-stat"><span>Distance DRM</span><b id="move-distance-drm">0</b></div>
+        <div class="result-stat"><span>Base allowance</span><b id="move-base">—</b></div>
+        <div class="result-stat"><span>Fatigue</span><b id="move-fatigue-result">0 → 1</b></div>
+      </div>
+      <p id="move-status" class="rule-note" role="status"></p>
+      <div class="workspace-grid movement-grid">
+        <div class="stack">
+          <section class="card">
+            <div class="card-heading"><div><span class="section-number">01</span><h2>Movement allowance</h2></div></div>
+            <div class="field-grid"><label>Army<select id="move-side" data-movement="side"><option value="USA">Union</option><option value="CSA">Confederate</option></select></label><label>Unit type<select id="move-unit" data-movement="unit"><option value="infantry">Infantry</option><option value="artillery">Artillery</option><option value="cavalry">Cavalry / mounted infantry</option></select></label><label>Game<select id="move-game" data-movement="game"></select></label><label>Leader activation<select id="move-leader" data-movement="leader"></select></label><label class="check-field"><input id="move-btcDates" data-movement="btcDates" type="checkbox"><span>BTC: November 15–17, 1862</span></label></div>
+            <p class="rule-note">Choose the army, unit, game, and leader used to determine movement points. These choices also apply to the extended march rules.</p>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><span class="section-number">02</span><h2>Movement roll</h2></div><b id="move-formula">1D6</b></div>
+            <div class="field-grid"><label>Movement die 1<input id="move-distance1" data-movement="distance1" type="number" min="1" max="6" step="1" placeholder="1–6"></label><label>Movement die 2<input id="move-distance2" data-movement="distance2" type="number" min="1" max="6" step="1" placeholder="1–6"></label></div>
+            <p class="rule-note">Distance DRM applies to the dice sum. Mounted infantry uses the cavalry allowance where permitted by the game’s rules.</p>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><span class="section-number">03</span><h2>Force march</h2></div></div>
+            <label class="check-field"><input id="move-force" data-movement="force" type="checkbox"><span>Declare force march</span></label>
+            <p id="move-force-note" class="rule-note"></p>
+            <div class="field-grid movement-roll-fields"><label>Force march die 1<input id="move-force1" data-movement="force1" type="number" min="1" max="6" step="1" placeholder="1–6"></label><label>Force march die 2<input id="move-force2" data-movement="force2" type="number" min="1" max="6" step="1" placeholder="1–6"></label></div>
+            <p id="move-force-result" class="movement-result" role="status"></p>
+          </section>
+        </div>
+        <aside class="stack">
+          <section class="card">
+            <div class="card-heading"><div><span class="section-number">Extended march</span><h2>Extended march</h2></div><div class="force-total"><span>Roll DRM</span><b id="move-extended-drm">—</b></div></div>
+            <div class="field-grid"><label>Starting fatigue<select id="move-fatigue" data-movement="fatigue"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label><label>Fatigue after march<select id="move-fatigueAfter" data-movement="fatigueAfter"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label><label>Strength marker<select id="move-organized" data-movement="organized"><option value="true">Organized</option><option value="false">Disorganized</option></select></label><label>Starting manpower<input id="move-manpower" data-movement="manpower" type="number" min="1" max="99" step="1" placeholder="1–99"></label><label>Unit side<select id="move-exhausted" data-movement="exhausted"><option value="false">Normal</option><option value="true">Exhausted</option></select></label><label class="check-field"><input id="move-optional" data-movement="optional" type="checkbox"><span>Use optional organized fatigue-4 march</span></label></div>
+            <p id="move-extended-status" class="movement-result" role="status"></p>
+            <h3 class="editor-subhead">March conditions</h3>
+            <div class="field-grid"><label class="check-field"><input id="move-garrison" data-movement="garrison" type="checkbox"><span>Outside Army of the Potomac / non-Regular Army (RWH)</span></label><label class="check-field"><input id="move-heat" data-movement="heat" type="checkbox"><span>Heat event in effect</span></label><label class="check-field"><input id="move-supply" data-movement="supply" type="checkbox"><span>Out of supply (Advanced Game)</span></label><label class="check-field"><input id="move-early" data-movement="early" type="checkbox"><span>AGA: 1861 scenario</span></label><label class="check-field"><input id="move-retreat" data-movement="retreat" type="checkbox"><span>AGA: Retreat March (scenario 2, 5, 6 or 7)</span></label></div>
+            <p class="rule-note">Starting and resulting fatigue stay linked: a march adds one level. Organization and manpower select the chart column; fatigue and conditions determine the DRM.</p>
+            <p id="move-modified-roll" class="rule-note"></p>
+            <div id="move-modifiers" class="modifier-list"></div>
+            <div id="move-extended-roll-controls" class="field-grid movement-roll-fields"><label>Extended march die<input id="move-extendedRoll" data-movement="extendedRoll" type="number" min="1" max="6" step="1" placeholder="1–6"></label></div>
+            <div id="move-extended-chart" class="movement-chart-wrap"><table class="movement-chart" aria-label="Selected extended march chart column"><thead><tr><th scope="col">Modified roll</th><th scope="col" id="move-chart-column"></th></tr></thead><tbody id="move-chart-rows"></tbody></table></div>
+            <p id="move-extended-result" class="movement-result" role="status"></p>
+            <p class="rule-note">Required when normal fatigue reaches 3–4, or exhausted fatigue reaches 2–4. Uses strength and manpower before the march.</p>
+          </section>
+          <section class="card"><h2>After the march</h2><p id="move-remaining" class="movement-result" role="status"></p><p class="rule-note">Each march adds one fatigue. Allowance does not include terrain costs, friendly-occupied hex penalties, or strategic movement.</p></section>
+        </aside>
+      </div>
+      <p class="rule-note">Source: GCACW Series Rules §5.1 and Charts &amp; Tables v1.6, page 4. Apply any additional scenario-specific rules.</p>
+    </section>
   </main>
 
   <footer>Selections are saved on this device. Rules judgments remain with the players.</footer>
   <script src="flank-rules.js"></script>
   <script src="app.js"></script>
+  <script src="movement.js"></script>
 </body>
 </html>

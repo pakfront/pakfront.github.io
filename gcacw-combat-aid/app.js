@@ -242,6 +242,21 @@ function switchTab(name){ document.querySelectorAll(".tab").forEach(t=>{const ac
 function updatePrimary(hex){ if(hex.primary){ state.defender.hexside=primaryHexside(hex); setValue("defender-hexside",state.defender.hexside); } }
 
 function bind(){
+  const themeToggle = get("theme-toggle");
+  function updateThemeButton(){
+    const dark = document.documentElement.dataset.theme !== "light";
+    themeToggle.setAttribute("aria-pressed", String(dark));
+    themeToggle.textContent = dark ? "Dark mode" : "Light mode";
+    themeToggle.setAttribute("aria-label", dark ? "Dark mode enabled; switch to light mode" : "Light mode enabled; switch to dark mode");
+  }
+  updateThemeButton();
+  themeToggle.addEventListener("click", () => {
+    const theme = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#141c19" : "#24372d";
+    try { localStorage.setItem("gcacw-theme", theme); } catch (_) {}
+    updateThemeButton();
+  });
   get("share-state").addEventListener("click",openShareDialog);
   get("copy-share").addEventListener("click",copyShareLink);
   const bindings={"attacker-tactics":["attacker","tactics"],"attack-type":["attacker","type"],"attacker-inf":["attacker","inf"],"attacker-cav":["attacker","cav"],"attacker-art":["attacker","art"],"attacker-mult":["attacker","mult"],"defender-tactics":["defender","tactics"],"defender-terrain":["defender","terrain"],"defender-hexside":["defender","hexside"],"artillery-resolved":["modifiers","artilleryResolved"],"rain-mod":["modifiers","rain"],"other-attacker":["modifiers","otherAttacker"],"water-crossing-mod":["modifiers","water"],"creek-mod":["modifiers","creek"],"ridge-mod":["modifiers","ridge"],"hill-mod":["modifiers","hill"],"mountain-mod":["modifiers","mountain"],"demoralized-mod":["modifiers","demoralized"],"other-defender":["modifiers","otherDefender"]};

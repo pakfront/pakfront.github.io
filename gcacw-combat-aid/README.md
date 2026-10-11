@@ -18,6 +18,7 @@ No package installation or build step is required.
 - `index.html` — interface markup
 - `styles.css` — responsive layout and map styling
 - `app.js` — combat calculations and UI behavior
+- `movement.js` — independent movement, extended march, and force march calculator
 - `flank-rules.js` — ZOC and flank-attack rules engine
 
 Worksheet selections are saved in the browser's local storage.
@@ -42,3 +43,22 @@ changes are excluded with a warning.
 Use `./export_site.sh <git-ref>` to export another revision, or
 `PAGES_DIR=/path/to/pages ./export_site.sh` to choose another Pages repository.
 The script does not commit or push; review the exported folder before publishing.
+
+## Movement tab
+
+Movement inputs are saved separately from combat and have their own reset button.
+Choose army, unit type, game, and leader (or a single-unit march), then enter the
+actual movement dice. Starting fatigue, exhaustion, strength organization, and
+manpower determine whether extended march is required and whether force march
+remains available. Resolve extended march before declaring force march. The
+calculator applies the movement and extended march exceptions on page 4 of
+GCACW Charts & Tables v1.6, including the optional organized fatigue-4 march.
+Movement inputs are not included in combat worksheet share links.
+
+Run movement calculation checks with `node tests/movement.test.js` (Node.js is
+needed only for these checks, not to run the site).
+
+Movement allowance controls appear on the left; extended march stats and
+conditions appear on the right. Starting and resulting fatigue are linked. The
+extended march chart shows the selected organization/manpower column and
+highlights the row for the modified die roll.

@@ -17,6 +17,31 @@ html[data-theme="dark"] #calibration{background:#343122;border-color:#a18e52;col
 button:focus-visible,.button:focus-within,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #b6a55b;outline-offset:2px}
 button:disabled{opacity:.5;cursor:default}
  #routeOptions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px;margin-bottom:10px;border:1px solid #9da491;border-radius:4px}#routeOptions[hidden]{display:none}#routeOptions label{margin:0}#routeSpeed{width:110px}#routeSpeedMessage{font-size:12px}
+/* Information tree */
+main{grid-template-columns:290px minmax(300px,1fr) 270px}
+#tree{padding:4px 0;border-block:1px solid #cbcfc4;margin-bottom:12px;overflow-x:auto}
+#tree button{display:flex;align-items:center;gap:4px;text-align:left;min-height:32px;margin:0;border:0;border-radius:3px;padding:5px 6px 5px calc(6px + var(--depth)*14px);background:transparent;width:100%}
+#tree button:hover{background:#e8eddf}#tree button.active{background:#334e3f;color:white}
+.tree-label{flex:1;overflow-wrap:anywhere}.tree-toggle{width:16px;flex:none;font-size:15px}.node-type{font:10px system-ui;letter-spacing:0;color:inherit;opacity:.75}
+#tree .tree-object{font-size:11px;color:#596454}.tree-insert{height:5px;margin:0 4px;border-radius:2px}
+#tree .drop-move{outline:2px solid #6b98bc;outline-offset:-2px;background:#dbe9f5}#tree .tree-insert.drop-move{background:#6b98bc}
+#tree .drop-copy{outline:2px dashed #b79026;outline-offset:-2px;background:#fff1c7}
+.node-actions{display:flex;flex-wrap:wrap;gap:4px}.node-actions button{width:auto;flex:1}h3{font-size:12px;font-weight:600;margin:14px 0 6px}
+#roster small{display:block;font:10px system-ui;letter-spacing:0;color:inherit;opacity:.8;margin-top:3px}.summary-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0 12px}
+html[data-theme="dark"] #tree{border-color:#526153}html[data-theme="dark"] #tree button:hover{background:#3b4b3e}html[data-theme="dark"] #tree button.active{background:#47644d}
+html[data-theme="dark"] #tree .tree-object{color:#c1cdbd}html[data-theme="dark"] #tree .drop-move{background:#294355}html[data-theme="dark"] #tree .drop-copy{background:#514726}
+@media(max-width:1150px){main{grid-template-columns:260px minmax(300px,1fr)}main>aside:last-child{grid-column:1/-1}main{height:auto}.workspace{height:80vh}}
+@media(max-width:650px){main{display:flex;flex-direction:column}header{align-items:flex-start;gap:12px;flex-direction:column;padding:16px}aside{max-height:none}.workspace{min-width:0;height:70vh;padding:8px}#tree{max-height:350px;overflow:auto}.mapbar{align-items:flex-start;flex-direction:column}}
+#militaryControls[hidden],#viewControls[hidden]{display:none}
+#militaryTree{border-block:1px solid #526153;padding:4px 0;margin-bottom:12px}
+#militaryTree button{display:flex;align-items:center;gap:4px;text-align:left;min-height:34px;margin:0;border:0;border-radius:3px;padding:5px 6px 5px calc(6px + var(--depth)*14px);background:transparent;width:100%}
+#militaryTree button.active{background:#334e3f;color:white}#militaryTree button:hover{background:#e8eddf}#militaryTree .drop-move{outline:2px solid #6b98bc;outline-offset:-2px}
+#militaryTree .tree-label small,#entityObjects small{display:block;font:10px system-ui;letter-spacing:0;color:inherit;opacity:.8;margin-top:2px}
+html[data-theme="dark"] #militaryTree button.active{background:#47644d}html[data-theme="dark"] #militaryTree button:hover{background:#3b4b3e}
 
-.all-tools{display:block;width:fit-content;margin-bottom:6px;color:#bac8b8;font:12px system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px}
-.all-tools:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+[hidden]{display:none!important}
+#workspaceSelector{position:sticky;top:0;z-index:2;background:inherit;margin:0;padding:0 0 10px}
+
+.command-warning{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;margin-left:4px;border-radius:50%;background:#8b5a09;color:#fff;font-weight:800;font-size:12px;cursor:help}
+.command-warning:focus-visible{outline:2px solid #b6a55b;outline-offset:2px}
+html[data-theme="dark"] .command-warning{background:#e4b746;color:#241b05}
