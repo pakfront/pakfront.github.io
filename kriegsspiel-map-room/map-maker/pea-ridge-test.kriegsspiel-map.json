@@ -1,0 +1,1091 @@
+{
+  "format": "kriegsspiel-map",
+  "version": 1,
+  "id": "pea-ridge-schematic-test",
+  "revision": 0,
+  "title": "Pea Ridge — schematic test map",
+  "coordinateSystem": {
+    "kind": "local-image",
+    "width": 1408,
+    "height": 960,
+    "metersPerUnit": 5,
+    "calibrated": false,
+    "baselineElevationMeters": 0
+  },
+  "background": null,
+  "layers": [
+    {
+      "id": "layer-0",
+      "name": "Elevation",
+      "order": 0,
+      "exportEnabled": true
+    },
+    {
+      "id": "layer-1",
+      "name": "Terrain",
+      "order": 1,
+      "exportEnabled": true
+    },
+    {
+      "id": "layer-2",
+      "name": "Roads and water",
+      "order": 2,
+      "exportEnabled": true
+    },
+    {
+      "id": "layer-3",
+      "name": "Landmarks",
+      "order": 3,
+      "exportEnabled": true
+    },
+    {
+      "id": "layer-4",
+      "name": "Labels",
+      "order": 4,
+      "exportEnabled": true
+    }
+  ],
+  "features": [
+    {
+      "id": "ridge",
+      "layerId": "layer-0",
+      "category": "elevation",
+      "subtype": "raised",
+      "name": "Pea Ridge / Elkhorn Mountain (illustrative +45 m)",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              140,
+              250
+            ],
+            [
+              260,
+              150
+            ],
+            [
+              510,
+              110
+            ],
+            [
+              700,
+              140
+            ],
+            [
+              840,
+              210
+            ],
+            [
+              940,
+              300
+            ],
+            [
+              880,
+              400
+            ],
+            [
+              690,
+              370
+            ],
+            [
+              530,
+              400
+            ],
+            [
+              350,
+              360
+            ],
+            [
+              190,
+              380
+            ],
+            [
+              140,
+              250
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "relativeHeightMeters": 45,
+        "priority": 0
+      },
+      "style": {
+        "stroke": "#b18946",
+        "fill": "#b18946",
+        "strokeWidth": 3,
+        "opacity": 0.3,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "hollow",
+      "layerId": "layer-0",
+      "category": "elevation",
+      "subtype": "depression",
+      "name": "Williams Hollow (illustrative -15 m)",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1010,
+              110
+            ],
+            [
+              1140,
+              130
+            ],
+            [
+              1190,
+              280
+            ],
+            [
+              1120,
+              420
+            ],
+            [
+              1040,
+              390
+            ],
+            [
+              1060,
+              280
+            ],
+            [
+              990,
+              210
+            ],
+            [
+              1010,
+              110
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "relativeHeightMeters": -15,
+        "priority": 1
+      },
+      "style": {
+        "stroke": "#7b79a2",
+        "fill": "#7b79a2",
+        "strokeWidth": 3,
+        "opacity": 0.3,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "ridge-woods",
+      "layerId": "layer-1",
+      "category": "terrain",
+      "subtype": "woods",
+      "name": "Wooded ridge",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              110,
+              250
+            ],
+            [
+              260,
+              130
+            ],
+            [
+              490,
+              85
+            ],
+            [
+              740,
+              130
+            ],
+            [
+              900,
+              220
+            ],
+            [
+              970,
+              310
+            ],
+            [
+              910,
+              440
+            ],
+            [
+              720,
+              410
+            ],
+            [
+              540,
+              450
+            ],
+            [
+              330,
+              390
+            ],
+            [
+              130,
+              430
+            ],
+            [
+              110,
+              250
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Rough wooded ground; manual adjudication.",
+        "cover": "Trees and irregular terrain.",
+        "sight": "Restricted within woods.",
+        "crossing": "",
+        "widthMeters": 0,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#47704b",
+        "fill": "#47704b",
+        "strokeWidth": 3,
+        "opacity": 0.3,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "west-woods",
+      "layerId": "layer-1",
+      "category": "terrain",
+      "subtype": "woods",
+      "name": "Leetown woods",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              70,
+              450
+            ],
+            [
+              240,
+              440
+            ],
+            [
+              320,
+              530
+            ],
+            [
+              290,
+              670
+            ],
+            [
+              390,
+              770
+            ],
+            [
+              250,
+              810
+            ],
+            [
+              70,
+              740
+            ],
+            [
+              70,
+              450
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Slow passage",
+        "cover": "Good cover",
+        "sight": "Limited within woods",
+        "crossing": "",
+        "widthMeters": 0,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#47704b",
+        "fill": "#47704b",
+        "strokeWidth": 3,
+        "opacity": 0.3,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "east-woods",
+      "layerId": "layer-1",
+      "category": "terrain",
+      "subtype": "woods",
+      "name": "Eastern woods",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1200,
+              180
+            ],
+            [
+              1360,
+              150
+            ],
+            [
+              1360,
+              770
+            ],
+            [
+              1180,
+              800
+            ],
+            [
+              1140,
+              650
+            ],
+            [
+              1200,
+              510
+            ],
+            [
+              1170,
+              380
+            ],
+            [
+              1200,
+              180
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Slow passage",
+        "cover": "Good cover",
+        "sight": "Limited within woods",
+        "crossing": "",
+        "widthMeters": 0,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#47704b",
+        "fill": "#47704b",
+        "strokeWidth": 3,
+        "opacity": 0.3,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "leetown-field",
+      "layerId": "layer-1",
+      "category": "terrain",
+      "subtype": "open",
+      "name": "Leetown clearing",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              330,
+              480
+            ],
+            [
+              490,
+              450
+            ],
+            [
+              600,
+              510
+            ],
+            [
+              610,
+              690
+            ],
+            [
+              470,
+              750
+            ],
+            [
+              330,
+              650
+            ],
+            [
+              330,
+              480
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Slow passage",
+        "cover": "Good cover",
+        "sight": "Limited within woods",
+        "crossing": "",
+        "widthMeters": 0,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#b6a46a",
+        "fill": "#d5c58f",
+        "strokeWidth": 3,
+        "opacity": 0.65,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "cox-field",
+      "layerId": "layer-1",
+      "category": "terrain",
+      "subtype": "open",
+      "name": "Cox field",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              640,
+              430
+            ],
+            [
+              800,
+              410
+            ],
+            [
+              970,
+              455
+            ],
+            [
+              970,
+              600
+            ],
+            [
+              810,
+              640
+            ],
+            [
+              630,
+              590
+            ],
+            [
+              640,
+              430
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Slow passage",
+        "cover": "Good cover",
+        "sight": "Limited within woods",
+        "crossing": "",
+        "widthMeters": 0,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#b6a46a",
+        "fill": "#d5c58f",
+        "strokeWidth": 3,
+        "opacity": 0.65,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "ruddick-field",
+      "layerId": "layer-1",
+      "category": "terrain",
+      "subtype": "open",
+      "name": "Ruddick field",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              980,
+              460
+            ],
+            [
+              1110,
+              430
+            ],
+            [
+              1180,
+              510
+            ],
+            [
+              1130,
+              650
+            ],
+            [
+              980,
+              620
+            ],
+            [
+              980,
+              460
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Slow passage",
+        "cover": "Good cover",
+        "sight": "Limited within woods",
+        "crossing": "",
+        "widthMeters": 0,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#b6a46a",
+        "fill": "#d5c58f",
+        "strokeWidth": 3,
+        "opacity": 0.65,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "telegraph",
+      "layerId": "layer-2",
+      "category": "route",
+      "subtype": "road",
+      "name": "Telegraph Road",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            740,
+            880
+          ],
+          [
+            800,
+            760
+          ],
+          [
+            850,
+            650
+          ],
+          [
+            900,
+            540
+          ],
+          [
+            1010,
+            410
+          ],
+          [
+            1000,
+            320
+          ],
+          [
+            980,
+            220
+          ],
+          [
+            1020,
+            100
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Suitable for formed troops",
+        "cover": "",
+        "sight": "",
+        "crossing": "",
+        "widthMeters": 6,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#95754d",
+        "fill": "#95754d",
+        "strokeWidth": 5,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "ford-road",
+      "layerId": "layer-2",
+      "category": "route",
+      "subtype": "road",
+      "name": "Ford Road (schematic)",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            180,
+            500
+          ],
+          [
+            420,
+            480
+          ],
+          [
+            600,
+            430
+          ],
+          [
+            760,
+            400
+          ],
+          [
+            890,
+            390
+          ],
+          [
+            1010,
+            410
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Suitable for formed troops",
+        "cover": "",
+        "sight": "",
+        "crossing": "",
+        "widthMeters": 5,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#95754d",
+        "fill": "#95754d",
+        "strokeWidth": 5,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "huntsville",
+      "layerId": "layer-2",
+      "category": "route",
+      "subtype": "road",
+      "name": "Huntsville Road (schematic)",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            1010,
+            410
+          ],
+          [
+            1110,
+            400
+          ],
+          [
+            1220,
+            430
+          ],
+          [
+            1350,
+            470
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Suitable for formed troops",
+        "cover": "",
+        "sight": "",
+        "crossing": "",
+        "widthMeters": 5,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#95754d",
+        "fill": "#95754d",
+        "strokeWidth": 5,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "leetown-road",
+      "layerId": "layer-2",
+      "category": "route",
+      "subtype": "road",
+      "name": "Leetown connection (illustrative)",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            460,
+            600
+          ],
+          [
+            600,
+            650
+          ],
+          [
+            740,
+            700
+          ],
+          [
+            835,
+            685
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Suitable for formed troops",
+        "cover": "",
+        "sight": "",
+        "crossing": "",
+        "widthMeters": 4,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#95754d",
+        "fill": "#95754d",
+        "strokeWidth": 5,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "sugar-creek",
+      "layerId": "layer-2",
+      "category": "obstacle",
+      "subtype": "creek",
+      "name": "Little Sugar Creek (schematic)",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            70,
+            840
+          ],
+          [
+            220,
+            820
+          ],
+          [
+            380,
+            870
+          ],
+          [
+            560,
+            840
+          ],
+          [
+            740,
+            880
+          ],
+          [
+            880,
+            830
+          ],
+          [
+            1040,
+            870
+          ],
+          [
+            1190,
+            820
+          ],
+          [
+            1360,
+            850
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "",
+        "cover": "",
+        "sight": "",
+        "crossing": "Test map creek; crossing conditions require manual adjudication.",
+        "widthMeters": 5,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#488ba5",
+        "fill": "#488ba5",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "tavern",
+      "layerId": "layer-3",
+      "category": "landmark",
+      "subtype": "building",
+      "name": "Elkhorn Tavern",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1010,
+          410
+        ]
+      },
+      "properties": {
+        "movement": "",
+        "cover": "",
+        "sight": "",
+        "crossing": "",
+        "widthMeters": 12,
+        "heightMeters": 8,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#694838",
+        "fill": "#996b50",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "leetown",
+      "layerId": "layer-3",
+      "category": "landmark",
+      "subtype": "building",
+      "name": "Leetown",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          460,
+          600
+        ]
+      },
+      "properties": {
+        "movement": "",
+        "cover": "",
+        "sight": "",
+        "crossing": "",
+        "widthMeters": 10,
+        "heightMeters": 6,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#694838",
+        "fill": "#996b50",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "pratts",
+      "layerId": "layer-3",
+      "category": "landmark",
+      "subtype": "building",
+      "name": "Pratt’s Store / Curtis HQ",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          850,
+          650
+        ]
+      },
+      "properties": {
+        "movement": "",
+        "cover": "",
+        "sight": "",
+        "crossing": "",
+        "widthMeters": 10,
+        "heightMeters": 6,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#694838",
+        "fill": "#996b50",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "title",
+      "layerId": "layer-4",
+      "category": "annotation",
+      "subtype": "label",
+      "name": "PEA RIDGE — SCHEMATIC TEST MAP",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          400,
+          45
+        ]
+      },
+      "properties": {},
+      "style": {
+        "stroke": "#334339",
+        "fill": "#334339",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 20,
+        "dashed": false
+      }
+    },
+    {
+      "id": "note",
+      "layerId": "layer-4",
+      "category": "annotation",
+      "subtype": "label",
+      "name": "Approximate terrain, scale and elevations; editable vectors",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          400,
+          78
+        ]
+      },
+      "properties": {},
+      "style": {
+        "stroke": "#334339",
+        "fill": "#334339",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 20,
+        "dashed": false
+      }
+    },
+    {
+      "id": "ridge-label",
+      "layerId": "layer-4",
+      "category": "annotation",
+      "subtype": "label",
+      "name": "Pea Ridge / Elkhorn Mountain",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          370,
+          280
+        ]
+      },
+      "properties": {},
+      "style": {
+        "stroke": "#334339",
+        "fill": "#334339",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 20,
+        "dashed": false
+      }
+    },
+    {
+      "id": "cox-label",
+      "layerId": "layer-4",
+      "category": "annotation",
+      "subtype": "label",
+      "name": "Cox field",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          710,
+          530
+        ]
+      },
+      "properties": {},
+      "style": {
+        "stroke": "#334339",
+        "fill": "#334339",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 20,
+        "dashed": false
+      }
+    },
+    {
+      "id": "ruddick-label",
+      "layerId": "layer-4",
+      "category": "annotation",
+      "subtype": "label",
+      "name": "Ruddick field",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          995,
+          555
+        ]
+      },
+      "properties": {},
+      "style": {
+        "stroke": "#334339",
+        "fill": "#334339",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 20,
+        "dashed": false
+      }
+    },
+    {
+      "id": "creek-label",
+      "layerId": "layer-4",
+      "category": "annotation",
+      "subtype": "label",
+      "name": "Little Sugar Creek",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          300,
+          915
+        ]
+      },
+      "properties": {},
+      "style": {
+        "stroke": "#334339",
+        "fill": "#334339",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 20,
+        "dashed": false
+      }
+    },
+    {
+      "id": "north",
+      "layerId": "layer-4",
+      "category": "annotation",
+      "subtype": "label",
+      "name": "N ↑",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1300,
+          80
+        ]
+      },
+      "properties": {},
+      "style": {
+        "stroke": "#334339",
+        "fill": "#334339",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 20,
+        "dashed": false
+      }
+    }
+  ],
+  "extensions": {
+    "description": "Schematic inspired by Pea Ridge, March 7–8, 1862. North is up. Positions, field boundaries, road paths, scale, and elevations are illustrative, not surveyed. Elevations are relative to an arbitrary zero datum. No troop placements.",
+    "sources": [
+      "https://www.nps.gov/articles/pearidge.htm",
+      "https://home.nps.gov/peri/planyourvisit/leetown-tour-stop-2.htm",
+      "https://www.nps.gov/peri/planyourvisit/stop-7-east-overlook-day-2.htm"
+    ]
+  }
+}

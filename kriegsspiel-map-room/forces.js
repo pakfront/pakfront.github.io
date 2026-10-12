@@ -61,7 +61,7 @@ const ForceModel = (() => {
   }
   function linkObject(state,objectId,entityId) {
     const o=state.objects.find(o=>o.id===objectId);if(!o)throw Error('Choose a map object.');
-    if(o.type==='region')throw Error('Visible areas do not represent military units.');
+    if(['region','annotation'].includes(o.type))throw Error('Areas and annotations do not represent military units.');
     if(entityId!==null&&!get(state,entityId))throw Error('Choose an existing military record.');
     if((o.entityId??null)===entityId)return false;
     if(entityId===null)delete o.entityId;else o.entityId=entityId;
@@ -106,7 +106,7 @@ const ForceModel = (() => {
     }
     validateTrees(state);
     for(const n of state.nodes)if(n.commanderId!=null&&(n.type!=='commander'||!commander(state,n.commanderId)))throw Error('Invalid commander view link.');
-    for(const o of state.objects)if(o.entityId!==undefined&&(!get(state,o.entityId)||o.type==='region'))throw Error('Invalid map-to-military link.');
+    for(const o of state.objects)if(o.entityId!==undefined&&(!get(state,o.entityId)||['region','annotation'].includes(o.type)))throw Error('Invalid map-to-military link.');
   }
   return {get,commander,parentId,children,path,forceId,addCommander,addEntity,setParent,assignCommander,linkObject,linkView,deleteEntity,deleteCommander,initialize,validate};
 })();

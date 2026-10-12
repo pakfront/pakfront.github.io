@@ -1,0 +1,410 @@
+{
+  "format": "kriegsspiel-map",
+  "version": 1,
+  "id": "example-battlefield",
+  "revision": 0,
+  "title": "Wooded crossing example",
+  "coordinateSystem": {
+    "kind": "local-image",
+    "width": 1408,
+    "height": 768,
+    "metersPerUnit": 5,
+    "calibrated": true,
+    "baselineElevationMeters": 100
+  },
+  "background": null,
+  "layers": [
+    {
+      "id": "battlefield-layer",
+      "name": "Battlefield",
+      "order": 0,
+      "exportEnabled": true
+    }
+  ],
+  "features": [
+    {
+      "id": "hill",
+      "layerId": "battlefield-layer",
+      "category": "elevation",
+      "subtype": "raised",
+      "name": "Ridge",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              140,
+              90
+            ],
+            [
+              620,
+              90
+            ],
+            [
+              620,
+              420
+            ],
+            [
+              140,
+              420
+            ],
+            [
+              140,
+              90
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "relativeHeightMeters": 20,
+        "priority": 0
+      },
+      "style": {
+        "stroke": "#b18946",
+        "fill": "#b18946",
+        "strokeWidth": 3,
+        "opacity": 0.3,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "woods",
+      "layerId": "battlefield-layer",
+      "category": "terrain",
+      "subtype": "woods",
+      "name": "North woods",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              200,
+              140
+            ],
+            [
+              530,
+              140
+            ],
+            [
+              530,
+              350
+            ],
+            [
+              200,
+              350
+            ],
+            [
+              200,
+              140
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Slow passage",
+        "cover": "Good cover",
+        "sight": "Limited within woods",
+        "crossing": "",
+        "widthMeters": 0,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#47704b",
+        "fill": "#47704b",
+        "strokeWidth": 3,
+        "opacity": 0.3,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "depression",
+      "layerId": "battlefield-layer",
+      "category": "elevation",
+      "subtype": "depression",
+      "name": "Hollow",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              360,
+              250
+            ],
+            [
+              480,
+              250
+            ],
+            [
+              480,
+              330
+            ],
+            [
+              360,
+              330
+            ],
+            [
+              360,
+              250
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "relativeHeightMeters": -10,
+        "priority": 2
+      },
+      "style": {
+        "stroke": "#7b79a2",
+        "fill": "#7b79a2",
+        "strokeWidth": 3,
+        "opacity": 0.3,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "lake",
+      "layerId": "battlefield-layer",
+      "category": "terrain",
+      "subtype": "lake",
+      "name": "Lake with island",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              900,
+              90
+            ],
+            [
+              1250,
+              90
+            ],
+            [
+              1250,
+              340
+            ],
+            [
+              900,
+              340
+            ],
+            [
+              900,
+              90
+            ]
+          ],
+          [
+            [
+              1020,
+              180
+            ],
+            [
+              1020,
+              230
+            ],
+            [
+              1100,
+              230
+            ],
+            [
+              1100,
+              180
+            ],
+            [
+              1020,
+              180
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Impassable except at designated crossings",
+        "cover": "",
+        "sight": "",
+        "crossing": "",
+        "widthMeters": 0,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#568aa4",
+        "fill": "#568aa4",
+        "strokeWidth": 3,
+        "opacity": 0.3,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "road",
+      "layerId": "battlefield-layer",
+      "category": "route",
+      "subtype": "road",
+      "name": "Crossing road",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            70,
+            500
+          ],
+          [
+            680,
+            500
+          ],
+          [
+            1180,
+            600
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "Suitable for formed troops",
+        "cover": "",
+        "sight": "",
+        "crossing": "",
+        "widthMeters": 6,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#95754d",
+        "fill": "#95754d",
+        "strokeWidth": 5,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "creek",
+      "layerId": "battlefield-layer",
+      "category": "obstacle",
+      "subtype": "creek",
+      "name": "Creek",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            650,
+            190
+          ],
+          [
+            680,
+            500
+          ],
+          [
+            720,
+            710
+          ]
+        ]
+      },
+      "properties": {
+        "movement": "",
+        "cover": "",
+        "sight": "",
+        "crossing": "Requires a bridge or ford",
+        "widthMeters": 4,
+        "heightMeters": 0,
+        "relatedFeatureIds": []
+      },
+      "style": {
+        "stroke": "#488ba5",
+        "fill": "#488ba5",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "bridge",
+      "layerId": "battlefield-layer",
+      "category": "landmark",
+      "subtype": "bridge",
+      "name": "Bridge",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          680,
+          500
+        ]
+      },
+      "properties": {
+        "movement": "",
+        "cover": "",
+        "sight": "",
+        "crossing": "Single crossing point",
+        "widthMeters": 5,
+        "heightMeters": 0,
+        "relatedFeatureIds": [
+          "road",
+          "creek"
+        ]
+      },
+      "style": {
+        "stroke": "#805d3f",
+        "fill": "#805d3f",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "label",
+      "layerId": "battlefield-layer",
+      "category": "annotation",
+      "subtype": "label",
+      "name": "Wooded crossing",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          750,
+          55
+        ]
+      },
+      "properties": {},
+      "style": {
+        "stroke": "#334339",
+        "fill": "#334339",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    },
+    {
+      "id": "arrow",
+      "layerId": "battlefield-layer",
+      "category": "annotation",
+      "subtype": "arrow",
+      "name": "Approach",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100,
+            650
+          ],
+          [
+            400,
+            550
+          ]
+        ]
+      },
+      "properties": {},
+      "style": {
+        "stroke": "#a34d36",
+        "fill": "#a34d36",
+        "strokeWidth": 3,
+        "opacity": 1,
+        "fontSize": 18,
+        "dashed": false
+      }
+    }
+  ]
+}
