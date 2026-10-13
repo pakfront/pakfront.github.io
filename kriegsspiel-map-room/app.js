@@ -6,6 +6,7 @@ const collapsed=new Set();
 let activeEntity=null,activePerson=null;
 let treePayload=null, publishing=false,selectedVertex=null,pendingMapDocument=null;
 let savedScenarioSignature=JSON.stringify(state);
+let roomSnapTarget=null;
 const current=()=>M.getNode(state,active), view=()=>$('view').value;
 const esc=s=>String(s??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
 const pathName=id=>M.ancestorPath(state,id).map(n=>n.name).join(' / ');
@@ -139,7 +140,7 @@ function render(){
  function draw(r,comparison=false){const owner=!published?M.getNode(state,r.ownerId):null;if(r.type==='region'){drawRegion(comparison?$('truth'):$('regions'),r);return;}if(r.type==='annotation'){drawAnnotation(comparison?$('truth'):$('regions'),r);return;}const truth=owner?.type==='truth';symbol(comparison?$('truth'):$('contacts'),r,!truth,settings.metersPerPixel);}
  for(const r of comparison)draw(r,true);for(const r of effective)draw(r);
  if(view()==='overlay'&&$('links').checked)for(const r of effective){const u=state.objects.find(o=>o.id===r.truthId&&o.ownerId===truthNode().id);if(u&&!['region','annotation'].includes(r.type))node('line',{x1:u.x,y1:u.y,x2:r.x,y2:r.y,stroke:'#6e664f','stroke-width':2,'stroke-dasharray':'3 5'},$('connections'));}
- renderMeasurements(settings);renderGeometryHandles();renderTerrainInspector(source.mapDocument);
+ renderMeasurements(settings);renderGeometryHandles();renderTerrainInspector(source.mapDocument);renderRoomSnap();
  $('scale').textContent=`${settings.calibrated?'Calibrated':'Provisional scale'} · ${settings.metersPerPixel.toFixed(2)} m / image pixel`;
  const own=effective.filter(o=>published||o.ownerId===active),inherited=effective.filter(o=>!published&&o.ownerId!==active);
  function rows(list){return list.map(o=>`<button data-object="${o.id}" draggable="${!published}" class="${selected?.id===o.id?'active':''}">${esc(o.label)}${!published&&o.ownerId!==active?`<small>${esc(pathName(o.ownerId))}</small>`:''}</button>`).join('');}
@@ -157,7 +158,7 @@ function renderMeasurements(settings){
  if(kind==='circle'&&p.length===2)node('circle',{cx:p[0][0],cy:p[0][1],r:d,fill:'none',stroke:'#b27613','stroke-width':2},$('measure'));
 }
 $('routeSpeed').oninput=render;
-function choose(t){if(typeof LosUI!=='undefined')LosUI.cancelStroke();endMapDrag(true);tool=t;points=[];selectedVertex=null;$('annotationOptions').hidden=t!=='annotation';$('calibration').hidden=t!=='calibrate';$('applyCalibration').disabled=true;document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));$('status').textContent={select:'Select objects. Edit inherited objects at their owner.',pan:'Drag to pan the map.',counter:`Click to place a counter in ${pathName(active)}.`,marker:`Click to place a marker in ${pathName(active)}.`,polygon:`Draw a visible area owned by ${pathName(active)}, then Finish drawing.`,annotation:`Draw an annotation owned by ${pathName(active)}.`,insert:'Select an owned area or annotation, then click a segment to insert a vertex.',ruler:'Click route points, then Finish drawing.',circle:'Click center, then radius point.',calibrate:'Click two map points and enter their real-world distance.'}[t]||(t.startsWith('los')?'Place an observer and target, or use the LOS panel.':'Select a tool.');render();}
+function choose(t){if(typeof LosUI!=='undefined')LosUI.cancelStroke();endMapDrag(true);roomSnapTarget=null;tool=t;points=[];selectedVertex=null;$('annotationOptions').hidden=t!=='annotation';$('calibration').hidden=t!=='calibrate';$('applyCalibration').disabled=true;document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));$('status').textContent={select:'Select objects. Edit inherited objects at their owner.',pan:'Drag to pan the map.',counter:`Click to place a counter in ${pathName(active)}.`,marker:`Click to place a marker in ${pathName(active)}.`,polygon:`Draw a visible area owned by ${pathName(active)}, then Finish drawing.`,annotation:`Draw an annotation owned by ${pathName(active)}.`,insert:'Select an owned area or annotation, then click a segment to insert a vertex.',ruler:'Click route points, then Finish drawing.',circle:'Click center, then radius point.',calibrate:'Click two map points and enter their real-world distance.'}[t]||(t.startsWith('los')?'Place an observer and target, or use the LOS panel.':'Select a tool.');render();}
 document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>choose(b.dataset.tool));
 function pos(e){return MapViewport.position($('map'),e);}
 $('map').onpointerdown=e=>{
@@ -165,22 +166,22 @@ $('map').onpointerdown=e=>{
  if(typeof LosUI!=='undefined'&&LosUI.pointerDown(e,p))return;
  if(tool==='pan'){drag={type:'pan',start:p};$('map').setPointerCapture(e.pointerId);return;}
  if(tool==='select'){
-  const handle=e.target.closest('[data-vertex]');selected=target?{id:target.dataset.id}:null;selectedVertex=handle?{ring:Number(handle.dataset.ring),index:Number(handle.dataset.vertex)}:null;
+  const handle=MapInput.handle($('map'),e),id=handle?.dataset.id||penInput.pick(e,'[data-id]','data-id');selected=id?{id}:null;selectedVertex=handle?{ring:Number(handle.dataset.ring),index:Number(handle.dataset.vertex)}:null;
   const terrain=e.target.closest('[data-feature]');if(terrain){$('terrainFeature').value=terrain.dataset.feature;terrainDetails();}
-  const r=record();if(writable(r)){if(objectGeometry(r)){drag={type:'geometry',r,start:p,geometry:M.copy(objectGeometry(r)),vertex:selectedVertex,before:M.copy(state),changed:false};}else drag={type:'record',r,offset:[r.x-p[0],r.y-p[1]],before:M.copy(state),changed:false};$('map').setPointerCapture(e.pointerId);}renderTree();render();edit();return;
+  const r=record();if(writable(r)){if(objectGeometry(r)){drag={type:'geometry',r,start:p,screen:[e.clientX,e.clientY],geometry:M.copy(objectGeometry(r)),vertex:selectedVertex,before:M.copy(state),changed:false};}else drag={type:'record',r,screen:[e.clientX,e.clientY],offset:[r.x-p[0],r.y-p[1]],before:M.copy(state),changed:false};$('map').setPointerCapture(e.pointerId);}renderTree();render();edit();return;
  }
  if(view()==='published'){$('status').textContent='Choose Draft to edit or measure.';return;}
- if(tool==='insert'){const r=record();if(!writable(r)||!objectGeometry(r)){$('status').textContent='Select an owned area or annotation first.';return;}mutate(()=>setObjectGeometry(r,GeometryEditor.insertVertex(objectGeometry(r),p)));return;}
+ if(tool==='insert'){const r=record();if(!writable(r)||!objectGeometry(r)){$('status').textContent='Select an owned area or annotation first.';return;}mutate(()=>setObjectGeometry(r,GeometryEditor.insertVertex(objectGeometry(r),roomSnap(p,e,r.id))));return;}
  if(['counter','marker'].includes(tool)){
   mutate(()=>{const r={id:M.id(),ownerId:active,type:tool,label:tool==='marker'?'Map marker':current().type==='truth'?'New regiment':'Reported infantry',kind:tool==='marker'?'marker':'infantry',side:current().type==='truth'?'blue':'unknown',x:p[0],y:p[1],facing:0,strength:'',activity:'',observed:state.time,radius:0,presentation:current().type==='truth'?'confirmed':'reported',notes:'',falseContact:false};state.objects.push(r);selected={id:r.id};});choose('select');edit();return;
  }
- if(tool==='calibrate'&&points.length===2)points=[];points.push(p);
+ if(tool==='calibrate'&&points.length===2)points=[];points.push(roomSnap(p,e));
  if(tool==='calibrate'){$('applyCalibration').disabled=points.length!==2;$('calibrationMessage').textContent=points.length===2?'Enter the known distance and click Apply calibration.':'Click the second point.';}
  if(tool==='annotation'&&MapDocument.presets.annotation[$('annotationPreset').value][1]==='Point')finish();
  if(tool==='circle'&&points.length===2)finish();render();
 };
-$('map').onpointermove=e=>{if(typeof LosUI!=='undefined'&&LosUI.pointerMove(e,pos(e)))return;if(!drag)return;const p=pos(e);if(drag.type==='record'){const x=p[0]+drag.offset[0],y=p[1]+drag.offset[1];if(x!==drag.r.x||y!==drag.r.y){if(!drag.changed)remember();drag.changed=true;drag.r.x=x;drag.r.y=y;}render();}else if(drag.type==='geometry'){const g=drag.vertex?GeometryEditor.moveVertex(drag.geometry,drag.vertex.ring,drag.vertex.index,p):Geometry.translate(drag.geometry,p[0]-drag.start[0],p[1]-drag.start[1]);if(JSON.stringify(g)!==JSON.stringify(objectGeometry(drag.r))){if(!drag.changed)remember();drag.changed=true;setObjectGeometry(drag.r,g,false);}render();}else{box[0]+=drag.start[0]-p[0];box[1]+=drag.start[1]-p[1];render();}};
-function endMapDrag(cancel=false){if(!drag)return;const completed=drag;drag=null;if(completed.changed){try{if(cancel)throw Error('Edit cancelled.');if(completed.type==='geometry')Geometry.validate(objectGeometry(completed.r));}catch(e){state=completed.before;history.pop();$('status').textContent=e.message;}sync();}}
+$('map').onpointermove=e=>{if(typeof LosUI!=='undefined'&&LosUI.pointerMove(e,pos(e)))return;if(!drag){if(points.length){roomSnap(pos(e),e);renderRoomSnap();}return;}let p=pos(e);if(drag.type!=='pan'&&!MapInput.moved(drag,e))return;if(drag.type==='geometry'&&drag.vertex)p=roomSnap(p,e,drag.r.id);if(drag.type==='record'){const x=p[0]+drag.offset[0],y=p[1]+drag.offset[1];if(x!==drag.r.x||y!==drag.r.y){if(!drag.changed)remember();drag.changed=true;drag.r.x=x;drag.r.y=y;}render();}else if(drag.type==='geometry'){const g=drag.vertex?GeometryEditor.moveVertex(drag.geometry,drag.vertex.ring,drag.vertex.index,p):Geometry.translate(drag.geometry,p[0]-drag.start[0],p[1]-drag.start[1]);if(JSON.stringify(g)!==JSON.stringify(objectGeometry(drag.r))){if(!drag.changed)remember();drag.changed=true;setObjectGeometry(drag.r,g,false);}render();}else{box[0]+=drag.start[0]-p[0];box[1]+=drag.start[1]-p[1];render();}};
+function endMapDrag(cancel=false){if(!drag)return;const completed=drag;drag=null;roomSnapTarget=null;renderRoomSnap();if(completed.changed){try{if(cancel)throw Error('Edit cancelled.');if(completed.type==='geometry')Geometry.validate(objectGeometry(completed.r));}catch(e){state=completed.before;history.pop();$('status').textContent=e.message;}sync();}}
 $('map').onpointerup=()=>{if(typeof LosUI!=='undefined')LosUI.pointerUp();endMapDrag();};$('map').onpointercancel=()=>{if(typeof LosUI!=='undefined')LosUI.cancelStroke();endMapDrag(true);};
 $('map').onwheel=e=>{e.preventDefault();const settings=MapDocument.settings(view()==='published'?(current().published||state):state);box=MapViewport.zoom(box,pos(e),e.deltaY,settings.width);render();};
 function finish(){if(view()==='published')return;if(tool==='polygon'&&points.length>=3){if(mutate(()=>{Geometry.validate(Geometry.fromPoints('Polygon',points));const r={id:M.id(),ownerId:active,type:'region',label:'Visible area',points:M.copy(points),notes:'',falseContact:false};state.objects.push(r);selected={id:r.id};})){points=[];}render();edit();}else if(tool==='annotation'){const subtype=$('annotationPreset').value,type=MapDocument.presets.annotation[subtype][1];if(points.length<(type==='Point'?1:type==='LineString'?2:3))return;if(mutate(()=>{const f=MapDocument.feature('annotation',subtype,points,'annotation');Geometry.validate(f.geometry);const r={id:M.id(),ownerId:active,type:'annotation',subtype,label:f.name,geometry:f.geometry,style:f.style,notes:'',falseContact:false};state.objects.push(r);selected={id:r.id};})){points=[];choose('select');edit();}}else if(['ruler','circle'].includes(tool)&&points.length>=2){measurement={kind:tool,points:M.copy(points)};points=[];render();}}
@@ -227,3 +228,13 @@ $('terrainFeature').onchange=()=>terrainDetails();
 document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;const r=record();if(e.key.startsWith('Arrow')&&document.activeElement.closest('#map')&&writable(r)&&objectGeometry(r)){e.preventDefault();const amount=e.shiftKey?10:1,dx=e.key==='ArrowLeft'?-amount:e.key==='ArrowRight'?amount:0,dy=e.key==='ArrowUp'?-amount:e.key==='ArrowDown'?amount:0;mutate(()=>setObjectGeometry(r,Geometry.translate(objectGeometry(r),dx,dy)));}});
 window.addEventListener('beforeunload',e=>{if(JSON.stringify(state)!==savedScenarioSignature){e.preventDefault();e.returnValue='';}});
 sync();
+
+function roomSnap(p,e,excludeId=null){
+ const features=[...state.mapDocument.features,...displayObjects().filter(r=>objectGeometry(r)).map(r=>({id:r.id,geometry:objectGeometry(r)}))];
+ const result=penInput.snap(p,e,features,excludeId);roomSnapTarget=result.target?result.point:null;return result.point;
+}
+function renderRoomSnap(){
+ let overlay=$('map').querySelector('.pen-snap-preview');if(!overlay){overlay=node('g',{'class':'pen-snap-preview'},$('map'));}overlay.replaceChildren();
+ if(roomSnapTarget&&(points.length||drag?.vertex))node('circle',{cx:roomSnapTarget[0],cy:roomSnapTarget[1],r:MapViewport.tolerance($('map'),10),fill:'none',stroke:'#df9f26','stroke-width':2,'vector-effect':'non-scaling-stroke'},overlay);
+}
+const penInput=MapInput.mount({box:()=>box,setBox:b=>{box=b;},width:()=>MapDocument.settings(view()==='published'?(current().published||state):state).width,render,tool:()=>tool,selected:()=>selected?.id,select:id=>{selected={id};selectedVertex=null;renderTree();render();edit();},cancelDrawing:()=>choose('select'),cancelDrag:()=>{roomSnapTarget=null;renderRoomSnap();if(typeof LosUI!=='undefined')LosUI.cancelStroke();endMapDrag(true);}});

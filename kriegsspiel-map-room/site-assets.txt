@@ -9,6 +9,7 @@ site-assets.txt
 shared/geometry.js
 shared/map-document.js
 shared/map-viewport.js
+shared/map-input.js
 shared/geometry-editor.js
 shared/document-history.js
 shared/map-renderer.js
