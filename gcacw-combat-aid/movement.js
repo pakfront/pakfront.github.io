@@ -25,7 +25,7 @@ const MovementRules = (() => {
     const eligible=s.fatigue<4 || optional;
     const fatigue=Math.min(4,s.fatigue+1);
     const extended=eligible && !optional && fatigue>=(s.exhausted?2:3);
-    const extendedReason=!eligible?'March unavailable at starting fatigue 4.':optional?'No extended march roll required: optional organized fatigue-4 march.':extended?`Extended march roll required: ${s.exhausted?'exhausted':'normal'} side reaches fatigue ${fatigue}.`:`No extended march roll required: ${s.exhausted?'exhausted':'normal'} side reaches fatigue ${fatigue}.`;
+    const extendedReason=!eligible?'March unavailable at starting fatigue 4.':optional?'No extended march roll required: optional organized fatigue-4 march.':extended?`Extended march roll required: ${s.exhausted?'exhausted':'unexhausted'} unit reaches fatigue ${fatigue}.`:`No extended march roll required: ${s.exhausted?'exhausted':'unexhausted'} unit reaches fatigue ${fatigue}.`;
     const modifiers=[];
     const add=(label,value)=>{if(value)modifiers.push({label,value});};
     if (!s.exhausted && s.fatigue===3) add('Normal side: fatigue 3 → 4',1);
@@ -100,6 +100,8 @@ const MovementRules = (() => {
     el('extended-chart').hidden=!r.extended;
     el('modifiers').hidden=!r.extended;
     el('extended-status').textContent=r.extendedReason;
+    const threshold=6-r.extendedDRM;
+    el('failure-threshold').textContent=r.extended?`With the selected conditions, ${threshold>6?'no natural die roll can fail':threshold<=1?'every natural die roll fails':`a natural ${threshold}+ fails`} (modified roll 6+). ${state.organized?'Failure disorganizes the unit.':'Failure costs manpower using the column below.'}`:'Fatigue modifiers are added to army and march-condition modifiers. Failure occurs on a modified roll of 6+.';
     el('force').disabled=!r.forceEligible;el('force1').disabled=el('force2').disabled=!state.force||!r.forceEligible;
     el('distance-drm').textContent=sign(r.drm);
     el('formula').textContent=`${r.cavalry?'2D6':'1D6'}${r.drm?sign(r.drm):''}${r.minimum?' · minimum 2 MP':''}`;
