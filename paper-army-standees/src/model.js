@@ -7,11 +7,11 @@ export function unitTypeOptions(art) {
 }
 
 export function defaultSetup() {
-  return {version: 1, nameplates: false, names: {}, copyNames: {},
-    unitTypes: Object.fromEntries(catalog.filter(a => unitTypeOptions(a).length).map(a => [a.id, unitTypeOptions(a)[0]])),
+  return {version: 1, nameplates: false, numberBases: false, factionSymbols: false, names: {}, copyNames: {},
+    unitTypes: Object.fromEntries(catalog.filter(a => unitTypeOptions(a).length).map(a => [a.id, a.defaultUnitType ?? unitTypeOptions(a)[0]])),
     ranks: 2, skirmisherRanks: 1, riders: 4, lightRiders: 3, reverse: 'silhouette', infantryHeight: 14.5, mountedHeight: 21,
-    cavalryBaseDepth: 20, monstrosityBaseDepth: 20, fakeShadows: false, figureBackground: 'solid', gradientBottom: '#456b94', gradientTop: '#eef7ff', labelPlacement: 'separate',
-    groundColor: '#b6bc91', figureColor: '#ffffff', silhouetteColor: '#cccccc', paper: 'letter', orientation: 'portrait', margin: 10, gap: 4, guides: true,
+    cavalryBaseDepth: 20, monstrosityBaseDepth: 20, fakeShadows: false, figureBackground: 'solid', gradientBottom: '#456b94', gradientTop: '#eef7ff', labelPlacement: 'rear',
+    groundColorMode: 'faction', groundColor: '#b6bc91', figureColor: '#ffffff', silhouetteColor: '#cccccc', paper: 'letter', orientation: 'portrait', margin: 10, gap: 4, guides: true,
     quantities: Object.fromEntries(catalog.map(art => [art.id, ['gondor-swords', 'gondor-horse', 'orc-axes', 'orc-wargs'].includes(art.id) ? 1 : 0]))};
 }
 
@@ -26,18 +26,23 @@ export function validateSetup(input) {
   number('ranks', 1, 4, true); number('riders', 2, 4, true);
   if (input.skirmisherRanks !== undefined) number('skirmisherRanks', 1, 4, true);
   if (input.lightRiders !== undefined) number('lightRiders', 2, 4, true);
+  // Preserve the single ground color in setups saved before faction palettes.
+  result.groundColorMode = input.groundColorMode === undefined ? 'setup' : input.groundColorMode;
+  if (!['faction', 'setup'].includes(result.groundColorMode)) throw Error('Invalid ground color mode.');
   const unitTypes = input.unitTypes ?? {};
   if (typeof unitTypes !== 'object' || Array.isArray(unitTypes) || input.unitTypes === null) throw Error('Invalid unit types.');
   for (const art of catalog) {
     const options = unitTypeOptions(art);
     if (!options.length) continue;
-    const type = unitTypes[art.id] ?? options[0];
+    // Setups predating battle roles retain their original formations.
+    const type = unitTypes[art.id] ?? (input.unitTypes === undefined ? options[0] : art.defaultUnitType ?? options[0]);
     if (!options.includes(type)) throw Error(`${art.name}: invalid unit type.`);
     result.unitTypes[art.id] = type;
   }
   number('infantryHeight', 10, 30); number('mountedHeight', 15, 30);
   number('margin', 5, 25); number('gap', 2, 10);
-  for (const [key, values] of Object.entries({cavalryBaseDepth: [20, 30, 40], monstrosityBaseDepth: [20, 30, 40], figureBackground: ['solid', 'gradient'], labelPlacement: ['separate', 'attached']})) {
+  // Missing placement uses the same rear-band default as a new setup.
+  for (const [key, values] of Object.entries({cavalryBaseDepth: [20, 30, 40], monstrosityBaseDepth: [20, 30, 40], figureBackground: ['solid', 'gradient'], labelPlacement: ['separate', 'attached', 'rear']})) {
     if (input[key] === undefined) continue;
     if (!values.includes(input[key])) throw Error(`Invalid ${key}.`);
     result[key] = input[key];
@@ -58,6 +63,10 @@ export function validateSetup(input) {
   if (!input.quantities || typeof input.quantities !== 'object' || Array.isArray(input.quantities)) throw Error('Missing unit quantities.');
   if (input.nameplates !== undefined && typeof input.nameplates !== 'boolean') throw Error('Invalid nameplate setting.');
   result.nameplates = input.nameplates ?? false;
+  for (const key of ['numberBases', 'factionSymbols']) {
+    if (input[key] !== undefined && typeof input[key] !== 'boolean') throw Error(`Invalid ${key} setting.`);
+    result[key] = input[key] ?? false;
+  }
   for (const key of ['names', 'copyNames']) {
     const values = input[key] ?? {};
     if (!values || typeof values !== 'object' || Array.isArray(values)) throw Error(`Invalid ${key}.`);
@@ -85,6 +94,14 @@ export function validateSetup(input) {
   return result;
 }
 
+// Explicit per-base names replace the entire automatic name, including its number.
+export function baseLabel(art, setup, copy = 1) {
+  const custom = setup.copyNames?.[art.id]?.[copy - 1];
+  if (custom) return custom;
+  const name = setup.names?.[art.id] || art.name;
+  return setup.numberBases && !art.hero && setup.quantities[art.id] > 1 ? `${name} ${copy}` : name;
+}
+
 // The unfolded strip is: half foot, [front, back, full foot]..., half foot.
 // Each pair doubles back at its crest; only flat feet contribute to the base span.
 export function makeStrip(art, setup, copy = 1) {
@@ -100,21 +117,38 @@ export function makeStrip(art, setup, copy = 1) {
     ? unitType === 'Light Riders' ? (setup.lightRiders ?? 3) : setup.riders
     : unitType === 'Skirmishers' ? (setup.skirmisherRanks ?? 1) : setup.ranks);
   const panelHeight = art.panelHeight ?? (mounted ? setup.mountedHeight : setup.infantryHeight);
-  const pitch = span / count, sections = [], folds = [];
+  const rear = setup.labelPlacement === 'rear' && (setup.nameplates || setup.factionSymbols);
+  const rearDepth = rear ? 7 : 0;
+  const firstFoot = rear && !mounted ? (count === 1 ? (span - rearDepth) / 2 : 3) : span / count / 2;
+  const pitch = rear && !mounted && count > 1 ? (span - rearDepth - firstFoot) / (count - 1) : span / count;
+  const lastFoot = rear && !mounted ? (count === 1 ? span - firstFoot : rearDepth) : pitch / 2;
+  const sections = [], folds = [];
   let y = 0;
   const add = (kind, height, extra = {}) => { sections.push({kind, y, height, ...extra}); y += height; };
-  add('ground', pitch / 2);
+  add('ground', firstFoot);
   for (let rank = 0; rank < count; rank++) {
     folds.push({y, kind: 'valley'});
     add('face', panelHeight, {side: 'front', variant: 'front', rank});
     folds.push({y, kind: 'mountain'});
     add('face', panelHeight, {side: 'back', variant: mounted ? 'mirror' : setup.reverse, rank});
     folds.push({y, kind: 'valley'});
-    add('ground', rank === count - 1 ? pitch / 2 : pitch);
+    add('ground', rank === count - 1 ? lastFoot : pitch);
   }
   const strip = {art, copy, name: art.name, unitType, baseWidth, baseDepth, width, height: y, bodyWidth: width, bodyHeight: y, count, span, panelHeight, pitch, sections, folds};
-  if (setup.nameplates && setup.labelPlacement === 'attached') {
-    strip.labelName = setup.copyNames?.[art.id]?.[copy - 1] || setup.names?.[art.id] || art.name;
+  strip.uprightPositions = Array.from({length: count}, (_, i) => firstFoot + i * pitch);
+  if (rear) {
+    strip.rearDepth = rearDepth;
+    strip.labelName = setup.nameplates ? baseLabel(art, setup, copy) : '';
+    if (!mounted) {
+      const last = sections.at(-1);
+      strip.rearBand = {x: 0, y: last.y + last.height - rearDepth, width, height: rearDepth};
+    } else {
+      strip.postFoldCuts = sections.filter(s => s.side === 'front').map(s => ({
+        x: 0, y: s.y, width: rearDepth, height: panelHeight * 2}));
+    }
+  }
+  if (rear || (setup.nameplates && setup.labelPlacement === 'attached')) {
+    if (!rear) strip.labelName = baseLabel(art, setup, copy);
     strip.bodyY = 10;
     strip.bodyX = 0;
     // Broad end tongues wrap over the base edges along the strip's main axis.
@@ -129,15 +163,23 @@ export function makeStrip(art, setup, copy = 1) {
 export function layoutSetup(setup) {
   setup = validateSetup(setup);
   const items = catalog.flatMap(art => Array.from({length: setup.quantities[art.id]}, (_, i) => makeStrip(art, setup, i + 1)));
-  const labels = setup.nameplates ? items.flatMap(strip => {
-    const name = setup.copyNames[strip.art.id]?.[strip.copy - 1] || setup.names[strip.art.id] || strip.art.name;
+  const labels = items.flatMap(strip => {
+    if (strip.rearDepth) {
+      if (strip.art.kind !== 'Mounted') return [];
+      const rearLabel = {kind: 'nameplate', rearGround: true, art: strip.art,
+        copy: strip.copy, name: strip.labelName, width: strip.baseWidth, height: strip.rearDepth, sections: []};
+      return setup.nameplates ? [rearLabel, {kind: 'nameplate', wrap: true, edge: 'front', art: strip.art,
+        copy: strip.copy, name: strip.labelName, width: strip.baseWidth, height: 9, sections: []}] : [rearLabel];
+    }
+    if (!setup.nameplates) return [];
+    const name = baseLabel(strip.art, setup, strip.copy);
     if (setup.labelPlacement === 'attached') {
       if (strip.art.kind !== 'Mounted') return [];
       return ['front', 'back'].map(edge => ({kind: 'nameplate', wrap: true, edge, art: strip.art, copy: strip.copy,
         name, width: strip.baseWidth, height: 9, sections: []}));
     }
     return [{kind: 'nameplate', art: strip.art, copy: strip.copy, name, width: strip.baseWidth - 2, height: 4, sections: []}];
-  }) : [];
+  });
   return {...pack([...items, ...labels], setup), setup, total: items.length,
-    labelTotal: setup.nameplates ? items.length * (setup.labelPlacement === 'attached' ? 2 : 1) : 0};
+    labelTotal: setup.nameplates ? items.length * (['attached', 'rear'].includes(setup.labelPlacement) ? 2 : 1) : 0};
 }

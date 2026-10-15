@@ -1,3 +1,6 @@
+import {groundColorFor} from './catalog.js';
+import {groundSymbol, symbolPolygons, factionSymbols} from './symbols.js';
+
 const imageCache = new Map(), panelCache = new Map(), shadowCache = new Map();
 const DPI = 600, PX_PER_MM = DPI / 25.4;
 const makeCanvas = (w, h) => Object.assign(document.createElement('canvas'), {width: w, height: h});
@@ -21,7 +24,7 @@ async function sourceImage(art) {
   return imageCache.get(art.id);
 }
 
-export function panelKey(strip, variant, silhouetteColor = '#cccccc') { return `${strip.art.id}:${strip.bodyWidth ?? strip.width}:${strip.panelHeight}:${variant}${variant === 'silhouette' ? ':' + silhouetteColor : ''}`; }
+export function panelKey(strip, variant, silhouetteColor = '#cccccc') { return `${strip.art.id}:${strip.bodyWidth ?? strip.width}:${strip.panelHeight}${strip.rearDepth ? ':rear' + strip.rearDepth : ''}:${variant}${variant === 'silhouette' ? ':' + silhouetteColor : ''}`; }
 
 async function panelImage(strip, variant, silhouetteColor = '#cccccc') {
   strip = {...strip, width: strip.bodyWidth ?? strip.width};
@@ -34,14 +37,15 @@ async function panelImage(strip, variant, silhouetteColor = '#cccccc') {
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.scale(big.width / strip.width, big.height / strip.panelHeight);
     // Deeper mounted bases add padding, not larger horses or riders.
-    const artworkWidth = strip.art.kind === 'Mounted' ? Math.min(20, strip.width) : strip.width;
+    const rear = strip.art.kind === 'Mounted' ? strip.rearDepth ?? 0 : 0;
+    const artworkWidth = strip.art.kind === 'Mounted' ? Math.min(20, strip.width - rear) : strip.width;
     let dw = artworkWidth - 1, dh = strip.panelHeight - 1;
     if (strip.art.kind === 'Mounted' || strip.art.preserveAspect) {
       const ratio = Math.min(dw / source.width, dh / source.height);
       dw = source.width * ratio; dh = source.height * ratio;
     }
     ctx.drawImage(source.image, source.left, source.top, source.width, source.height,
-      (strip.width - dw) / 2, strip.panelHeight - .5 - dh, dw, dh);
+      rear ? (artworkWidth - dw) / 2 : (strip.width - dw) / 2, strip.panelHeight - .5 - dh, dw, dh);
     if (variant === 'silhouette') {
       ctx.globalCompositeOperation = 'source-in'; ctx.fillStyle = silhouetteColor;
       ctx.fillRect(0, 0, strip.width, strip.panelHeight);
@@ -124,12 +128,33 @@ function fittedLabel(strip, maxPoints = 8) {
   return {size, textWidth: labelFont.widthOfTextAtSize(strip.name, size * point) / point};
 }
 
+function fittedRearLabel(item, setup) {
+  const symbol = setup.factionSymbols ? factionSymbols[item.art.era]?.[item.art.faction] : null;
+  const symbolSize = symbol ? 4.8 : 0, inset = symbol ? symbolSize + 1.2 : 0;
+  if (!item.name) return {symbol, symbolSize, inset, lines: [], size: 0};
+  const available = item.width - inset;
+  const candidates = [[item.name]];
+  for (let i = 0; i < item.name.length; i++) if (item.name[i] === ' ')
+    candidates.push([item.name.slice(0, i), item.name.slice(i + 1)]);
+  for (const lines of candidates) {
+    try {
+      const size = Math.min(...lines.map(name => fittedLabel({...item, name, width: available}, 8).size));
+      return {symbol, symbolSize, inset, lines, size};
+    } catch { /* Try two lines before reporting a name that cannot fit. */ }
+  }
+  throw Error(`${item.art.name} base ${item.copy}: shorten the rear ground label (minimum 6 pt).`);
+}
+
 export async function prepareArtwork(layout) {
   if (layout.setup.nameplates) {
     await prepareLabelFont();
     for (const item of layout.pages.flat()) {
-      if (item.kind === 'nameplate') fittedLabel(item, item.wrap ? 6 : 8);
-      if (item.wrapTabs && item.art.kind !== 'Mounted') fittedLabel({art: item.art, copy: item.copy, name: item.labelName, width: item.baseWidth}, 6);
+      if (item.kind === 'nameplate') {
+        if (item.rearGround) fittedRearLabel(item, layout.setup);
+        else fittedLabel(item, item.wrap ? 6 : 8);
+      }
+      if (item.rearBand) fittedRearLabel({...item, name: item.labelName, width: item.rearBand.width}, layout.setup);
+      if (item.wrapTabs && layout.setup.nameplates && item.art.kind !== 'Mounted') fittedLabel({art: item.art, copy: item.copy, name: item.labelName, width: item.baseWidth}, 6);
     }
   }
   const jobs = new Map();
@@ -183,15 +208,35 @@ export function pageScene(layout, index) {
   rect(0, 0, width, height, '#ffffff');
   text(`PAPER ARMY STANDEES / Foot 40 x 20 mm; cavalry 40 x ${setup.cavalryBaseDepth} mm; monsters 40 x ${setup.monstrosityBaseDepth} mm; heroes 20 x 20 mm`, margin, margin + 2, 2.7);
   text('Print at 100% / actual size. Cut solid outlines; fold dashed crests and dotted feet.', margin, margin + 6, 2);
+  if (layout.pages[index].some(s => s.postFoldCuts))
+    text('PURPLE: trim doubled cavalry panels AFTER folding, before mounting. Keep ground feet intact.', margin, margin + 9, 1.8, '#773c85');
+  const rearLabel = (item, bx, by, bw, bh, color) => {
+    const fit = fittedRearLabel({...item, width: bw}, setup);
+    rect(bx, by, bw, bh, color);
+    if (fit.symbol) ops.push(...symbolPolygons({symbol: fit.symbol, size: fit.symbolSize, rotation: 0},
+      bx + .6, by + (bh - fit.symbolSize) / 2, contrast(color), color));
+    fit.lines.forEach((value, i) => {
+      const textWidth = labelFont.widthOfTextAtSize(value, fit.size * 72 / 25.4) / (72 / 25.4);
+      text(value, bx + fit.inset + (bw - fit.inset - textWidth) / 2,
+        by + bh / 2 + (i - (fit.lines.length - 1) / 2) * fit.size * 1.2 + fit.size * .35,
+        fit.size, contrast(color));
+    });
+  };
   for (const strip of layout.pages[index]) {
+    const groundColor = groundColorFor(strip.art, setup);
     const {x: netX, y, sections} = strip, x = netX + (strip.bodyX || 0), w = strip.bodyWidth ?? strip.width;
     text(`${strip.art.shortName || strip.art.name} ${strip.copy}${strip.kind === 'nameplate' ? strip.wrap ? ' / ' + strip.edge + ' label' : ' / label' : ''}`, netX, strip.captionY, w === 20 ? 1.7 : 2);
+    if (strip.kind === 'nameplate' && strip.rearGround) {
+      rearLabel(strip, x, y, w, strip.height, groundColor);
+      rect(x, y, w, strip.height, null, '#59645c');
+      continue;
+    }
     if (strip.kind === 'nameplate') {
       const {size, textWidth} = fittedLabel(strip, strip.wrap ? 6 : 8);
       rect(x, y, w, strip.height, '#ffffff', '#59645c');
       if (strip.wrap) {
-        rect(x, y, w, 3, setup.groundColor);
-        rect(x, y + 6, w, 3, setup.groundColor);
+        rect(x, y, w, 3, groundColor);
+        rect(x, y + 6, w, 3, groundColor);
         if (setup.guides) for (const offset of [3, 6]) {
           line(x, y + offset, x + w, y + offset, '#ffffff', .35, [1.2, .8]);
           line(x, y + offset, x + w, y + offset, '#8f6333', .15, [1.2, .8]);
@@ -205,7 +250,7 @@ export function pageScene(layout, index) {
       const sy = y + (strip.bodyY || 0) + section.y;
       if (section.kind === 'face' && setup.figureBackground === 'gradient') {
         ops.push({type: 'image', key: gradientKey(strip, section, setup), x, y: sy, w, h: section.height});
-      } else rect(x, sy, w, section.height, section.kind === 'ground' ? setup.groundColor : setup.figureColor);
+      } else rect(x, sy, w, section.height, section.kind === 'ground' ? groundColor : setup.figureColor);
       if (setup.fakeShadows) for (const shadow of groundShadows(strip, section)) {
         ops.push({type: 'image', key: shadowKey(strip, shadow), x, y: y + (strip.bodyY || 0) + shadow.y, w, h: shadow.height});
       }
@@ -213,11 +258,29 @@ export function pageScene(layout, index) {
         ops.push({type: 'image', key: panelKey(strip, section.variant, setup.silhouetteColor), x, y: sy, w, h: section.height});
       }
     }
+    if (strip.rearBand) {
+      const b = strip.rearBand;
+      rearLabel({...strip, name: strip.labelName}, x + b.x, y + (strip.bodyY || 0) + b.y, b.width, b.height, groundColor);
+    }
+    const mark = groundSymbol(strip, setup);
+    if (mark) {
+      const mx = x + mark.x, my = y + (strip.bodyY || 0) + mark.y;
+      // Clear only the emblem's patch, preserving shadows elsewhere on the ground.
+      rect(mx - .25, my - .25, mark.size + .5, mark.size + .5, groundColor);
+      ops.push(...symbolPolygons(mark, mx, my, contrast(groundColor), groundColor));
+    }
     if (setup.guides) for (const fold of strip.folds) {
       const mountain = fold.kind === 'mountain';
       // A white underlay keeps fine fold marks visible on dark setup colors.
       line(x, y + (strip.bodyY || 0) + fold.y, x + w, y + (strip.bodyY || 0) + fold.y, '#ffffff', .35, mountain ? [1.2, .8] : [.3, .6]);
       line(x, y + (strip.bodyY || 0) + fold.y, x + w, y + (strip.bodyY || 0) + fold.y, mountain ? '#8f6333' : '#517e94', .15, mountain ? [1.2, .8] : [.3, .6]);
+    }
+    for (const cut of strip.postFoldCuts ?? []) {
+      const cx = x + cut.x, cy = y + (strip.bodyY || 0) + cut.y;
+      // These cuts are assembly instructions, so remain visible when fold guides are off.
+      line(cx + cut.width, cy, cx + cut.width, cy + cut.height, '#773c85', .25, [1.5, .7]);
+      line(cx, cy, cx + cut.width, cy, '#773c85', .25, [1.5, .7]);
+      line(cx, cy + cut.height, cx + cut.width, cy + cut.height, '#773c85', .25, [1.5, .7]);
     }
     if (!strip.wrapTabs) rect(x, y, w, strip.height, null, '#59645c');
     else {
@@ -228,8 +291,8 @@ export function pageScene(layout, index) {
       };
       for (const tab of strip.wrapTabs) {
         const ty = y + tab.y, front = tab.edge === 'front';
-        rect(x, ty, w, tab.height, setup.groundColor);
-        if (strip.art.kind !== 'Mounted') {
+        rect(x, ty, w, tab.height, groundColor);
+        if (setup.nameplates && strip.art.kind !== 'Mounted' && (!strip.rearDepth || front)) {
           const bandY = ty + (front ? 7 : 0);
           rect(x, bandY, w, 3, '#ffffff');
           const {size, textWidth} = fittedLabel({art: strip.art, copy: strip.copy, name: strip.labelName, width: w}, 6);
@@ -255,6 +318,7 @@ const escape = value => String(value).replace(/[&<>"']/g, c => ({'&': '&amp;', '
 export function previewSVG(layout, index, assets) {
   const elements = pageScene(layout, index).map(op => {
     if (op.type === 'rect') return `<rect x="${op.x}" y="${op.y}" width="${op.w}" height="${op.h}" fill="${op.fill || 'none'}" stroke="${op.stroke || 'none'}" stroke-width="${op.thickness}"/>`;
+    if (op.type === 'polygon') return `<polygon points="${op.points.map(p => p.join(',')).join(' ')}" fill="${op.fill}"/>`;
     if (op.type === 'line') return `<line x1="${op.x}" y1="${op.y}" x2="${op.x2}" y2="${op.y2}" stroke="${op.color}" stroke-width="${op.thickness}" stroke-dasharray="${op.dash.join(' ')}"/>`;
     if (op.type === 'text') return `<text x="${op.x}" y="${op.y}" transform="rotate(${op.rotation} ${op.x} ${op.y})" font-family="Helvetica,Arial,sans-serif" font-size="${op.size}" fill="${op.color}">${escape(op.value)}</text>`;
     return `<image x="${op.x}" y="${op.y}" width="${op.w}" height="${op.h}" preserveAspectRatio="none" href="${assets.get(op.key).url}"/>`;
@@ -278,6 +342,11 @@ export async function createPDF(layout, assets, progress = () => {}) {
       if (op.type === 'rect') page.drawRectangle({x: op.x * point, y: (layout.height - op.y - op.h) * point,
         width: op.w * point, height: op.h * point, ...(op.fill ? {color: color(op.fill)} : {}),
         ...(op.stroke ? {borderColor: color(op.stroke), borderWidth: op.thickness * point} : {borderWidth: 0})});
+      else if (op.type === 'polygon') {
+        const points = op.points.map(([x, y]) => [x * point, (layout.height - y) * point]);
+        const path = points.map(([x, y], i) => `${i ? 'L' : 'M'} ${x} ${-y}`).join(' ') + ' Z';
+        page.drawSvgPath(path, {x: 0, y: 0, color: color(op.fill), borderWidth: 0});
+      }
       else if (op.type === 'line') page.drawLine({start: {x: op.x * point, y: (layout.height - op.y) * point},
         end: {x: op.x2 * point, y: (layout.height - op.y2) * point}, color: color(op.color), thickness: op.thickness * point,
         dashArray: op.dash.map(n => n * point)});
