@@ -63,7 +63,7 @@ See `oob-structure.md` for the data boundaries and future extensions.
 4. Draw a visible-area polygon and choose **Finish drawing**. Regions describe observation areas; they do not calculate terrain LOS or automatically reveal counters. Select an owned region and use **Delete object** to remove it.
 5. Choose **Compare with Truth** for an umpire overlay, with adjustable draft opacity and displacement links. Universal objects render once. Select **Draft** to return to the effective information view.
 6. Enter a **Situation summary** for the selected view. Ancestor summaries appear separately with their source names in the draft UI. Publication combines summaries in root-to-commander order.
-7. Save a scenario JSON before closing. Open it to resume the full tree, ownership, objects, masks, and publications. This app saves **version 5** scenarios with an embedded vector map document. Version 3 and 4 saves migrate when opened, including their independently frozen publications. Version 1 and 2 saves are not supported.
+7. Save a scenario JSON before closing. Open it to resume the full tree, ownership, objects, masks, and publications. This app saves **version 6** scenarios with an embedded vector map document. Version 3, 4, and 5 saves migrate when opened, including their independently frozen publications. Version 1 and 2 saves are not supported.
 
 Visibility regions and scenario annotations support whole-object dragging and vertex handles. Select an owned area or annotation, then use **Insert vertex** to add a vertex on its nearest segment. Selected vertex coordinates can be edited numerically or removed from the inspector. Inherited geometry and publications are read-only.
 
@@ -143,7 +143,7 @@ Truth links, private notes, false-contact flags, and unrelated objects do not en
 
 ## Sharing the app
 
-Run `export_site.bat` to create `kriegsspiel-map-room.zip`. It includes both applications, their `shared/` code, styles, this README, the local map, and its generated embedded copy. `site-assets.txt` is the shared asset manifest used by both export scripts. Extract the ZIP and open `index.html` or `map-maker/index.html`. Keep the folder structure intact. Git files, scenario saves, and browser data are excluded. The placeholder JPEG must exist locally even though it is ignored by Git.
+Run `export_site.bat` to create `kriegsspiel-map-room.zip`. It includes all three applications, their `shared/` code, styles, this README, the local map, and its generated embedded copy. `site-assets.txt` is the shared asset manifest used by both export scripts. Extract the ZIP and open `index.html`  , `map-maker/index.html`, or `oob-maker/index.html`. Keep the folder structure intact. Git files, scenario saves, and browser data are excluded. The placeholder JPEG must exist locally even though it is ignored by Git.
 
 From WSL/Linux, `./export_site.sh` exports committed assets from `HEAD` and the local map to `../pakfront.github.io/kriegsspiel-map-room/`. Uncommitted changes are excluded with a warning. Select another revision with `./export_site.sh <git-ref>` or another repository with `PAGES_DIR=/path/to/pages`. The script replaces only this app's folder and does not commit or push.
 
@@ -154,3 +154,20 @@ Serve the folder locally and open `checks.html` for inheritance, branch movement
 The implementation decisions and acceptance criteria are in `view-hierarchy-plan.md`. The Map Maker implementation and extension boundaries are in `map-maker-plan.md`. LOS implementation details are in `line-of-sight-plan.md`; `tests/line_of_sight_checks.py` covers heights, geometry, curvature/refraction, masks, brush editing, ownership, migration, frozen concealment exports, and direct-disk operation. Map Maker browser checks in `tests/map_maker_checks.py` cover authoring, vertex edits, layers, geometry validation, map imports, annotation inheritance/privacy, frozen vector publications, version 3 migration, and direct-disk export. Future work can add hole creation, split/join tools, continuous elevation, a map library, and automatic local recovery. Geographic LOS, multiple observers, multiple group memberships, and automatic contact synchronization remain future work.
 
 Tablet implementation priorities and acceptance criteria are in `tablet-usability-plan.md`. Run `tests/tablet_checks.py` with Python Playwright and Chromium for tablet navigation, selection, and cancellation checks.
+
+
+## OOB Maker
+
+Open `oob-maker/index.html` to prepare a reusable order of battle without a map. The Organization pane contains permanent force roots, formations of any depth, and units. The Commanders tab contains people, their optional ranks, private notes, and links to their assigned commands. Use the divider with the mouse or arrow keys to resize the independently scrolling panes; small screens stack them.
+
+Select a record to edit it in the right pane. Add records using the inline creation form. Units support optional starting personnel and gun counts, quality/training, and equipment descriptions. Blank counts mean unspecified; zero means known zero. Force and formation totals identify partial counts. These are setup values, with no casualty or combat calculations.
+
+Change permanent membership using Parent and Sibling position, or drag onto the middle of a formation to nest, and its top/bottom edge to insert before/after. Moves remain within a force. Duplicate copies a complete branch with fresh IDs and optionally clears commander assignments. Multiple assignments are allowed and flagged. Resolve listed subordinates or commander assignments before deletion. Each committed edit is undoable; search includes matching ancestors and the tree supports arrow keys, Home/End, and Enter.
+
+Save a `.kriegsspiel-oob.json` file to reuse the document. Saving includes private document, military, and commander notes. Open validates the complete document before replacing the current work. Unsaved changes are marked and leaving or replacing a modified document prompts before discarding it. Navigation does not transfer documents between applications.
+
+In Map Room, **Import OOB** previews counts and similar existing force names. Import appends new identities with fresh IDs in one undoable action; repeated imports create separate copies. Existing attachments, objects, views, and frozen publications remain intact. Imported units show **Unpositioned** until they have a truth counter. Select a formation or unit and choose **Place truth counter** to initialize its label, symbol, side, and setup strength text at map center; move it to deploy it. Subsequent identity edits leave existing counters and reports unchanged. Commander identities do not create information views. **Export OOB** extracts all permanent records and people, omitting operational attachments and map/view links. Existing Map Room organization editors remain available.
+
+Scenario version 6 adds canonical unit setup stats and optional commander rank. Versions 3–5 migrate through the existing map/publication migration path. Numeric strength is never inferred from map counter text. Canonical stats, rank, private notes, and military links stay out of public map payloads; publications retain their authored presentation.
+
+Run `python3 tests/oob_maker_checks.py` with Python Playwright and Chromium installed for OOB document, browser, import/privacy, large-tree, and extracted-ZIP checks. The application itself needs no build tools or server and works through `file://`.

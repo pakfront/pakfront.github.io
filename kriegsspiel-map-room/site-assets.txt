@@ -1,4 +1,5 @@
 index.html
+favicon.svg
 forces.js
 model.js
 app.js
@@ -23,3 +24,7 @@ shared/visibility-mask.js
 los-ui.js
 map-maker/pea-ridge-test.kriegsspiel-map.json
 map-maker/los-ui.js
+shared/oob-document.js
+oob-maker/index.html
+oob-maker/app.js
+oob-maker/style.css

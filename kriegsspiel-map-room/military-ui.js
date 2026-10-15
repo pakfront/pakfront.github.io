@@ -52,7 +52,7 @@ function renderMilitaryTree(){
  const rows=[];
  function branch(e,depth){
   const kids=F.children(state,e.id,operational()),open=!militaryCollapsed.has(e.id),c=F.commander(state,e.commanderId);
-  rows.push(`<button role="treeitem" aria-level="${depth+1}" aria-selected="${e.id===activeEntity}" ${kids.length?`aria-expanded="${open}"`:''} class="military-node ${e.id===activeEntity?'active':''}" style="--depth:${depth}" data-entity="${e.id}" draggable="${e.type!=='force'}"><span class="tree-toggle" data-military-toggle="${e.id}">${kids.length?(open?'▾':'▸'):'·'}</span><span class="tree-label">${esc(e.name)}${c?`<small>${esc(c.name)}</small>`:''}</span><small class="node-type">${operational()&&e.operationalParentId?'attached':esc(e.echelon||e.type)}</small></button>`);
+  rows.push(`<button role="treeitem" aria-level="${depth+1}" aria-selected="${e.id===activeEntity}" ${kids.length?`aria-expanded="${open}"`:''} class="military-node ${e.id===activeEntity?'active':''}" style="--depth:${depth}" data-entity="${e.id}" draggable="${e.type!=='force'}"><span class="tree-toggle" data-military-toggle="${e.id}">${kids.length?(open?'▾':'▸'):'·'}</span><span class="tree-label">${esc(e.name)}${e.type==='unit'&&!state.objects.some(o=>o.entityId===e.id&&o.ownerId===truthNode().id)?'<small>Unpositioned · no truth counter</small>':''}${c?`<small>${esc(c.name)}</small>`:''}</span><small class="node-type">${operational()&&e.operationalParentId?'attached':esc(e.echelon||e.type)}</small></button>`);
   if(open)for(const child of kids)branch(child,depth+1);
  }
  for(const root of F.children(state,null))branch(root,0);
@@ -91,7 +91,7 @@ function editMilitaryLink(r){
 }
 $('entityLink').onchange=()=>{if(!writable())return;const id=$('entityLink').value||null;mutate(()=>F.linkObject(state,selected.id,id));};
 $('entityObjects').onclick=event=>{const button=event.target.closest('[data-representation]');if(!button)return;const o=state.objects.find(o=>o.id===button.dataset.representation);if(o){$('structure').value='views';$('view').value='draft';setActive(o.ownerId,o.id);}};
-$('createTruthCounter').onclick=()=>mutate(()=>{const e=entity();if(!e||e.type==='force')throw Error('Choose a formation or unit.');const truth=truthNode(),side=F.path(state,e.id)[0].side,r={id:M.id(),ownerId:truth.id,entityId:e.id,type:'counter',kind:e.type==='formation'?'hq':e.kind,label:e.name,side,x:state.mapDocument.coordinateSystem.width/2,y:state.mapDocument.coordinateSystem.height/2,facing:0,strength:'',activity:'',observed:state.time,radius:0,presentation:'confirmed',notes:'',falseContact:false};state.objects.push(r);active=truth.id;selected={id:r.id};$('view').value='draft';$('status').textContent=`Truth counter created for ${e.name}.`;});
+$('createTruthCounter').onclick=()=>mutate(()=>{const e=entity();if(!e||e.type==='force')throw Error('Choose a formation or unit.');const truth=truthNode(),side=F.path(state,e.id)[0].side,r={id:M.id(),ownerId:truth.id,entityId:e.id,type:'counter',kind:e.type==='formation'?'hq':e.kind,label:e.name,side,x:state.mapDocument.coordinateSystem.width/2,y:state.mapDocument.coordinateSystem.height/2,facing:0,strength:OobDocument.counterDefaults(state,e).strength,activity:'',observed:state.time,radius:0,presentation:'confirmed',notes:'',falseContact:false};state.objects.push(r);active=truth.id;selected={id:r.id};$('view').value='draft';$('status').textContent=`Truth counter created for ${e.name}.`;});
 let militaryPayload=null;
 $('militaryTree').ondragstart=event=>{const row=event.target.closest('[data-entity]'),e=F.get(state,row?.dataset.entity);if(!e||e.type==='force'){event.preventDefault();return;}militaryPayload={id:e.id,operational:operational()};event.dataTransfer.setData('application/x-military',JSON.stringify(militaryPayload));event.dataTransfer.effectAllowed='move';};
 function militaryDropTarget(event){const row=event.target.closest('[data-entity]'),target=F.get(state,row?.dataset.entity),source=F.get(state,militaryPayload?.id);if(!source||!target||!['force','formation'].includes(target.type)||F.forceId(state,source.id)!==F.forceId(state,target.id)||F.path(state,target.id,operational()).some(e=>e.id===source.id))return null;return row;}
@@ -99,3 +99,17 @@ $('militaryTree').ondragover=event=>{clearDrop();const row=militaryDropTarget(ev
 $('militaryTree').ondrop=event=>{event.preventDefault();const row=militaryDropTarget(event),payload=militaryPayload;militaryPayload=null;clearDrop();if(!row||!payload)return;moveMilitary(payload.id,row.dataset.entity,payload.operational);};
 document.addEventListener('dragend',()=>{militaryPayload=null;clearDrop();});
 syncMilitary();
+
+let pendingOob=null;
+$('importOob').onchange=async event=>{const file=event.target.files[0];if(!file)return;try{
+ pendingOob=OobDocument.normalize(JSON.parse(await file.text()));
+ $('oobCounts').textContent=['force','formation','unit'].map(type=>`${pendingOob.entities.filter(e=>e.type===type).length} ${type}s`).concat(`${pendingOob.commanders.length} commanders`).join(' · ')+'. Forces: '+(pendingOob.entities.filter(e=>e.type==='force').map(e=>e.name).join(', ')||'none');
+ const names=state.military.entities.filter(e=>e.type==='force').map(e=>e.name.toLowerCase().replace(/[^a-z0-9]/g,''));
+ const similar=pendingOob.entities.filter(e=>e.type==='force'&&names.some(n=>{const name=e.name.toLowerCase().replace(/[^a-z0-9]/g,'');return n===name||n.includes(name)||name.includes(n);}));
+ $('oobDuplicates').textContent=similar.length?'Similar existing force names: '+similar.map(e=>e.name).join(', ')+'. Import creates another copy; it does not update existing forces.':'';
+ $('oobPreview').showModal();
+ }catch(e){pendingOob=null;$('status').textContent='Could not import OOB: '+e.message;}finally{event.target.value='';}};
+$('oobPreview').oncancel=()=>pendingOob=null;
+$('cancelOobImport').onclick=()=>{pendingOob=null;$('oobPreview').close();};
+$('confirmOobImport').onclick=()=>{if(!pendingOob)return;const input=pendingOob;if(mutate(()=>{OobDocument.append(state,input);$('status').textContent='OOB imported. Select an unpositioned unit and place its truth counter.';})){pendingOob=null;$('oobPreview').close();}};
+$('exportOob').onclick=()=>{try{const d=OobDocument.extract(state);download(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),(d.title.replace(/[^a-z0-9]/gi,'-')||'forces')+'.kriegsspiel-oob.json');}catch(e){$('status').textContent=e.message;}};

@@ -24,23 +24,24 @@ const ForceModel = (() => {
   }
   function addCommander(state,name) {
     if(typeof name!=='string'||!name.trim())throw Error('Enter a commander name.');
-    const c={id:id(),name:name.trim(),notes:''};state.military.commanders.push(c);return c;
+    const c={id:id(),name:name.trim(),rank:'',notes:''};state.military.commanders.push(c);return c;
   }
   function addEntity(state,parent,type,name) {
     if(!['force','formation','unit'].includes(type)||typeof name!=='string'||!name.trim())throw Error('Enter a formation or unit name.');
     if(type!=='force')assertParent(state,null,parent);
-    const e={id:id(),type,name:name.trim(),parentId:type==='force'?null:parent,operationalParentId:null,order:children(state,type==='force'?null:parent).length,echelon:'',kind:'infantry',side:'unknown',notes:'',commanderId:null};
+    const e={id:id(),type,name:name.trim(),parentId:type==='force'?null:parent,operationalParentId:null,order:Math.max(-1,...children(state,type==='force'?null:parent).map(e=>e.order))+1,echelon:'',kind:'infantry',side:'unknown',notes:'',commanderId:null};
+    if(type==='unit')e.stats={personnel:null,guns:null,quality:'',equipment:''};
     state.military.entities.push(e);return e;
   }
-  function validateTrees(state) {
+  function validateTrees(state,operational=true) {
     for(const e of state.military.entities){
       if(e.type==='force'){
-        if(e.parentId!==null||e.operationalParentId!==null)throw Error('Force roots stay at the top of both military trees.');
+        if(e.parentId!==null||e.operationalParentId!=null)throw Error('Force roots stay at the top of both military trees.');
       }else{
         assertParent(state,e,e.parentId);
-        if(e.operationalParentId!==null)assertParent(state,e,e.operationalParentId);
+        if(e.operationalParentId!=null)assertParent(state,e,e.operationalParentId);
       }
-      path(state,e.id);path(state,e.id,true);
+      path(state,e.id);if(operational)path(state,e.id,true);
     }
   }
   function setParent(state,entityId,targetId,operational=false) {
@@ -74,13 +75,13 @@ const ForceModel = (() => {
   }
   function deleteEntity(state,entityId) {
     const e=get(state,entityId);if(!e)throw Error('Military record no longer exists.');
-    if(children(state,entityId).length||children(state,entityId,true).length||state.objects.some(o=>o.entityId===entityId))throw Error('Remove subordinates, operational attachments, and map links before deleting this military record.');
+    if(children(state,entityId).length||children(state,entityId,true).length||(state.objects||[]).some(o=>o.entityId===entityId))throw Error('Remove subordinates, operational attachments, and map links before deleting this military record.');
     state.military.entities=state.military.entities.filter(x=>x.id!==entityId);
     return e.parentId;
   }
   function deleteCommander(state,commanderId) {
     if(!commander(state,commanderId))throw Error('Commander no longer exists.');
-    if(state.military.entities.some(e=>e.commanderId===commanderId)||state.nodes.some(n=>n.commanderId===commanderId))throw Error('Remove command assignments and view links before deleting this commander.');
+    if(state.military.entities.some(e=>e.commanderId===commanderId)||(state.nodes||[]).some(n=>n.commanderId===commanderId))throw Error('Remove command assignments and view links before deleting this commander.');
     state.military.commanders=state.military.commanders.filter(c=>c.id!==commanderId);
   }
   function initialize(state) {
@@ -95,18 +96,45 @@ const ForceModel = (() => {
       }
     }
   }
-  function validate(state,usedIds) {
+  function validateOrganization(state,usedIds=new Set(),operational=true) {
     const validId=v=>typeof v==='string'&&/^[A-Za-z0-9_-]+$/.test(v);
     if(!state.military||!Array.isArray(state.military.entities)||!Array.isArray(state.military.commanders))throw Error('Invalid military records.');
     for(const c of state.military.commanders){
-      if(!c||!validId(c.id)||usedIds.has(c.id)||typeof c.name!=='string'||!c.name.trim()||typeof c.notes!=='string')throw Error('Invalid commander identity.');usedIds.add(c.id);
+      if(!c||!validId(c.id)||usedIds.has(c.id)||typeof c.name!=='string'||!c.name.trim()||typeof c.notes!=='string'||(state.version>=6&&typeof c.rank!=='string'))throw Error('Invalid commander identity.');usedIds.add(c.id);
     }
     for(const e of state.military.entities){
       if(!e||!validId(e.id)||usedIds.has(e.id)||!['force','formation','unit'].includes(e.type)||typeof e.name!=='string'||!e.name.trim()||typeof e.notes!=='string'||typeof e.echelon!=='string'||!['infantry','cavalry','artillery','hq'].includes(e.kind)||!['red','blue','unknown'].includes(e.side)||!Number.isInteger(e.order)||e.order<0||!(e.operationalParentId===null||validId(e.operationalParentId))||!(e.commanderId===null||commander(state,e.commanderId)))throw Error('Invalid military formation or unit.');usedIds.add(e.id);
     }
-    validateTrees(state);
+    if(state.version>=6)for(const e of state.military.entities)if(e.type==='unit'){
+      const s=e.stats;if(!s||!['personnel','guns'].every(k=>s[k]===null||(Number.isSafeInteger(s[k])&&s[k]>=0))||!['quality','equipment'].every(k=>typeof s[k]==='string'))throw Error('Invalid unit setup stats.');
+    }
+    validateTrees(state,operational);
+  }
+  function validate(state,usedIds){
+    validateOrganization(state,usedIds);
     for(const n of state.nodes)if(n.commanderId!=null&&(n.type!=='commander'||!commander(state,n.commanderId)))throw Error('Invalid commander view link.');
     for(const o of state.objects)if(o.entityId!==undefined&&(!get(state,o.entityId)||['region','annotation'].includes(o.type)))throw Error('Invalid map-to-military link.');
   }
-  return {get,commander,parentId,children,path,forceId,addCommander,addEntity,setParent,assignCommander,linkObject,linkView,deleteEntity,deleteCommander,initialize,validate};
+  function move(state,entityId,targetId,position){
+    const before=JSON.parse(JSON.stringify(state.military));
+    try{
+      const e=get(state,entityId);if(!e)throw Error('Choose a record.');
+      const old=e.parentId;
+      if(e.type==='force'){if(targetId!==null)throw Error('Force roots stay at the top.');}
+      else setParent(state,entityId,targetId);
+      const siblings=children(state,targetId).filter(x=>x.id!==entityId);
+      if(!Number.isInteger(position)||position<0||position>siblings.length)throw Error('Invalid sibling position.');
+      siblings.splice(position,0,e);siblings.forEach((x,i)=>x.order=i);
+      if(old!==targetId)children(state,old).forEach((x,i)=>x.order=i);
+      validateTrees(state);return JSON.stringify(before)!==JSON.stringify(state.military);
+    }catch(error){state.military=before;throw error;}
+  }
+  function duplicate(state,entityId,clearAssignments=false){
+    const source=get(state,entityId);if(!source||source.type==='force')throw Error('Choose a unit or formation to duplicate.');
+    function branch(e,parent){const copy=JSON.parse(JSON.stringify(e));copy.id=id();copy.parentId=parent;copy.operationalParentId=null;if(clearAssignments)copy.commanderId=null;const kids=children(state,e.id);state.military.entities.push(copy);for(const child of kids)branch(child,copy.id);return copy;}
+    const position=children(state,source.parentId).findIndex(e=>e.id===source.id)+1;
+    const result=branch(source,source.parentId);result.name+=' copy';
+    move(state,result.id,result.parentId,position);return result;
+  }
+  return {validateOrganization,move,duplicate,get,commander,parentId,children,path,forceId,addCommander,addEntity,setParent,assignCommander,linkObject,linkView,deleteEntity,deleteCommander,initialize,validate};
 })();

@@ -121,7 +121,7 @@ const ViewModel = (() => {
   function defaultState() {
     const root={id:id(),parentId:null,type:'root',name:'Game',order:0,privateNotes:'',summary:''};
     const truth={id:id(),parentId:root.id,type:'truth',name:'Truth',order:0,privateNotes:'',summary:''};
-    const state={version:5,visibilityMasks:[],title:'Pea Ridge · practice encounter',time:'10:00',mapDocument:MapDocument.legacy({map:'fake-pea-ridge-map.jpg',width:1408,height:768,metersPerPixel:10,calibrated:false},'Pea Ridge'),rootId:root.id,nodes:[root,truth],objects:[]};
+    const state={version:6,visibilityMasks:[],title:'Pea Ridge · practice encounter',time:'10:00',mapDocument:MapDocument.legacy({map:'fake-pea-ridge-map.jpg',width:1408,height:768,metersPerPixel:10,calibrated:false},'Pea Ridge'),rootId:root.id,nodes:[root,truth],objects:[]};
     const red=addNode(state,root.id,'group','Red'),blue=addNode(state,root.id,'group','Blue');
     addNode(state,red.id,'commander','Red division');addNode(state,blue.id,'commander','Blue division');
     for (const r of [{label:'1st Infantry',kind:'infantry',side:'blue',x:490,y:520,strength:'450',activity:'Holding',facing:0},{label:'Ridge battery',kind:'artillery',side:'red',x:890,y:350,strength:'4 guns',activity:'Deployed',facing:25}]) {
@@ -175,7 +175,7 @@ const ViewModel = (() => {
       ids.add(o.id);
     }
     ForceModel.validate(state,ids);
-    if(state.version===5){
+    if(state.version>=5){
       if(!Array.isArray(state.visibilityMasks)||state.visibilityMasks.length>100)fail('Invalid visibility mask collection (maximum 100).');
       let cells=0;for(const mask of state.visibilityMasks){VisibilityMask.validate(mask);cells+=mask.grid.columns*mask.grid.rows;if(cells>2000000)fail('Scenario visibility masks exceed two million cells.');if(ids.has(mask.id)||!getNode(state,mask.ownerId))fail('Duplicate mask ID or missing owner.');ids.add(mask.id);}
       for(const n of state.nodes){if(n.maskId!==undefined&&n.maskId!==null&&(!validId(n.maskId)||!state.visibilityMasks.some(m=>m.id===n.maskId)))fail('Invalid selected visibility mask.');if(n.maskTreatment!==undefined&&!['overlay','conceal','fade'].includes(n.maskTreatment))fail('Invalid mask treatment.');}
@@ -188,7 +188,7 @@ const ViewModel = (() => {
       if (!n.published) continue;
       const p=n.published;
       const fields=p.visibilityMask!==undefined?[...snapshotFields,'visibilityMask']:snapshotFields;
-      if(p.visibilityMask!==undefined){if(state.version!==5)fail('Visibility requires scenario version 5.');VisibilityMask.validate(p.visibilityMask,{publicOnly:true});if(p.visibilityMask.grid.width!==p.mapDocument.coordinateSystem.width||p.visibilityMask.grid.height!==p.mapDocument.coordinateSystem.height)fail('Published mask extent does not match map.');}
+      if(p.visibilityMask!==undefined){if(state.version<5)fail('Visibility requires scenario version 5.');VisibilityMask.validate(p.visibilityMask,{publicOnly:true});if(p.visibilityMask.grid.width!==p.mapDocument.coordinateSystem.width||p.visibilityMask.grid.height!==p.mapDocument.coordinateSystem.height)fail('Published mask extent does not match map.');}
       if (Object.keys(p).some(k=>!fields.includes(k))||!Array.isArray(p.objects)||['summary','name','title','time','at'].some(k=>typeof p[k]!=='string')||!Number.isFinite(Date.parse(p.at))) fail('Invalid published snapshot.');
       if(legacy){if(!dimensions(p)||!raster(p.map))fail('Invalid published map.');}
       else MapDocument.validate(p.mapDocument,{publicOnly:true,portable:true});
@@ -212,9 +212,14 @@ const ViewModel = (() => {
     return state;
   }
   function validateScenario(state) {
-    if(!state||![3,4,5].includes(state.version))throw Error('Unsupported scenario version. This app requires version 5 (version 3 and 4 saves can be migrated).');
-    if(state.version===5)return validateRecords(state);
-    if(state.version===4){validateRecords(state);const migrated=copy(state);migrated.version=5;migrated.visibilityMasks=[];migrated.mapDocument=MapDocument.normalize(migrated.mapDocument);return validateRecords(migrated);}
+    if(!state||![3,4,5,6].includes(state.version))throw Error('Unsupported scenario version. This app requires version 6 (version 3, 4, and 5 saves can be migrated).');
+    if(state.version===6)return validateRecords(state);
+    if(state.version===5){validateRecords(state);const migrated=copy(state);migrated.version=6;
+      for(const c of migrated.military.commanders)c.rank='';
+      for(const e of migrated.military.entities)if(e.type==='unit')e.stats={personnel:null,guns:null,quality:'',equipment:''};
+      return validateRecords(migrated);
+    }
+    if(state.version===4){validateRecords(state);const migrated=copy(state);migrated.version=5;migrated.visibilityMasks=[];migrated.mapDocument=MapDocument.normalize(migrated.mapDocument);return validateScenario(migrated);}
     validateRecords(state,true);
     const migrated=copy(state),wrap=value=>{
       const mapDocument=MapDocument.publicProjection(MapDocument.legacy(value,'Battlefield'));
