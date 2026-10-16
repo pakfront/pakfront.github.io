@@ -10,10 +10,6 @@
 .era-filter{display:block;font-size:12px;font-weight:600;margin-bottom:12px}.era-filter select{display:block;margin-top:6px}
 
 .print-options{overflow-y:auto;min-height:0;max-height:560px;overscroll-behavior:contain;scrollbar-gutter:stable;padding:2px 3px 0}
-.print-options-heading{position:sticky;top:-2px;z-index:1;background:var(--bg);padding:10px 0 14px}
-.print-options> .panel:last-child{margin-bottom:0}
-.print-options> .panel>label:not(.check){display:block;font-size:12px;margin-top:14px}
-.print-options> .panel>label>select{margin-top:6px}
 .print-options:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 @media(min-width:951px) and (min-height:650px){
   .preview-column{display:flex;flex-direction:column;height:calc(100dvh - 36px);min-height:0}
@@ -29,3 +25,20 @@
 .faction-swatch{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-1px;background:var(--faction-color);border:1px solid #0003;border-radius:3px}
 
 .legend .post-fold{border-top:2px dashed #773c85}
+
+.options-header{position:sticky;top:-2px;z-index:1;background:var(--bg);padding:10px 0 12px}
+.options-header .print-options-heading{position:static;padding:0 0 10px}
+.options-tabs{display:flex;gap:4px;padding:4px;background:#e4e8dd;border-radius:8px}
+.options-tabs button{flex:1;border-color:transparent;background:transparent;font-size:12px}
+.options-tabs button[aria-selected="true"]{background:var(--paper);border-color:var(--line);box-shadow:0 1px 3px #25382f10}
+.print-options [role="tabpanel"]>.panel:last-child{margin-bottom:0}
+.print-options [role="tabpanel"]>.panel>label:not(.check){display:block;font-size:12px;margin-top:14px}
+.print-options [role="tabpanel"]>.panel>label>select{margin-top:6px}
+.section-intro{margin-top:-8px;margin-bottom:18px}
+.unit-settings+.unit-settings{border-top:1px solid var(--line);margin-top:20px;padding-top:20px}
+.unit-settings h3{font-size:14px;margin:0 0 12px;font-weight:650}
+.base-size{font-size:12px;color:var(--muted);margin-bottom:14px}
+.settings-help{font-size:12px;color:var(--muted);line-height:1.6;margin-top:14px}
+.settings-help summary{cursor:pointer;font-weight:600}
+.settings-grid>label{min-width:0}
+@media(max-width:380px){.unit-settings .settings-grid{grid-template-columns:1fr}}

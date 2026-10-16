@@ -11,6 +11,28 @@ let setup = defaultSetup(), currentLayout = null, currentAssets = null, pageInde
 
 const notice = document.createElement('p'); notice.className = 'notice'; notice.hidden = true; notice.setAttribute('role', 'status');
 document.querySelector('.intro').after(notice);
+const optionTabs = [...document.querySelectorAll('.options-tabs [role="tab"]')];
+function selectOptionsTab(tab) {
+  for (const item of optionTabs) {
+    const selected = item === tab;
+    item.setAttribute('aria-selected', String(selected));
+    item.tabIndex = selected ? 0 : -1;
+    $(item.getAttribute('aria-controls')).hidden = !selected;
+  }
+  document.querySelector('.print-options').scrollTop = 0;
+}
+for (const [index, tab] of optionTabs.entries()) {
+  tab.addEventListener('click', () => selectOptionsTab(tab));
+  tab.addEventListener('keydown', event => {
+    let next;
+    if (event.key === 'ArrowRight') next = optionTabs[(index + 1) % optionTabs.length];
+    if (event.key === 'ArrowLeft') next = optionTabs[(index + optionTabs.length - 1) % optionTabs.length];
+    if (event.key === 'Home') next = optionTabs[0];
+    if (event.key === 'End') next = optionTabs.at(-1);
+    if (!next) return;
+    event.preventDefault(); selectOptionsTab(next); next.focus();
+  });
+}
 function tell(message, error = false) { notice.textContent = message; notice.classList.toggle('error', error); notice.hidden = false; }
 try {
   const saved = localStorage.getItem(storageKey);
