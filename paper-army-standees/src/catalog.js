@@ -13,7 +13,7 @@ export const factionGroundColors = {
     Isengard: {color: '#71528c', name: 'Amethyst'},
     Harad: {color: '#c49a36', name: 'Ochre gold'},
     Orcs: {color: '#b65f35', name: 'Burnt orange'},
-    Goblins: {color: '#258c91', name: 'Teal'},
+    Goblins: {color: '#795238', name: 'Warm brown'},
   },
   'american-civil-war': {
     CSA: {color: '#a65a3e', name: 'Copper'},

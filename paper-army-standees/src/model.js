@@ -167,7 +167,8 @@ export function layoutSetup(setup) {
     if (strip.rearDepth) {
       if (strip.art.kind !== 'Mounted') return [];
       const rearLabel = {kind: 'nameplate', rearGround: true, art: strip.art,
-        copy: strip.copy, name: strip.labelName, width: strip.baseWidth, height: strip.rearDepth, sections: []};
+        copy: strip.copy, name: strip.labelName, width: strip.baseWidth, labelHeight: strip.rearDepth,
+        height: strip.rearDepth + 10, sections: []};
       return setup.nameplates ? [rearLabel, {kind: 'nameplate', wrap: true, edge: 'front', art: strip.art,
         copy: strip.copy, name: strip.labelName, width: strip.baseWidth, height: 9, sections: []}] : [rearLabel];
     }
@@ -176,7 +177,7 @@ export function layoutSetup(setup) {
     if (setup.labelPlacement === 'attached') {
       if (strip.art.kind !== 'Mounted') return [];
       return ['front', 'back'].map(edge => ({kind: 'nameplate', wrap: true, edge, art: strip.art, copy: strip.copy,
-        name, width: strip.baseWidth, height: 9, sections: []}));
+        name, width: strip.baseWidth, height: edge === 'back' ? 10 : 9, sections: []}));
     }
     return [{kind: 'nameplate', art: strip.art, copy: strip.copy, name, width: strip.baseWidth - 2, height: 4, sections: []}];
   });
