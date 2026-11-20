@@ -2,7 +2,10 @@ import {catalog, eras, factionGroundColors, groundColorFor} from './catalog.js';
 import {defaultSetup, validateSetup, layoutSetup, makeStrip, unitTypeOptions} from './model.js';
 import {prepareArtwork, previewSVG, createPDF} from './render.js';
 
-const $ = id => document.getElementById(id), storageKey = 'uprights.setup.v1';
+import {project, editProject, rosterBases, changes} from './project.js';
+import {renderMapping} from './mapping.js';
+
+const $ = id => document.getElementById(id);
 const fields = {factionSymbols: 'faction-symbols', numberBases: 'number-bases', fakeShadows: 'fake-shadows', cavalryBaseDepth: 'cavalry-base-depth', monstrosityBaseDepth: 'monstrosity-base-depth', figureBackground: 'figure-background', gradientBottom: 'gradient-bottom', gradientTop: 'gradient-top', labelPlacement: 'label-placement', ranks: 'ranks', skirmisherRanks: 'skirmisher-ranks', riders: 'riders', lightRiders: 'light-riders', reverse: 'reverse', infantryHeight: 'infantry-height', mountedHeight: 'mounted-height',
   groundColorMode: 'ground-color-mode', groundColor: 'ground-color', figureColor: 'figure-color', silhouetteColor: 'silhouette-color', paper: 'paper', orientation: 'orientation', margin: 'margin', gap: 'gap', guides: 'guides', nameplates: 'nameplates'};
 const numeric = new Set(['cavalryBaseDepth', 'monstrosityBaseDepth', 'ranks', 'skirmisherRanks', 'riders', 'lightRiders', 'infantryHeight', 'mountedHeight', 'margin', 'gap']);
@@ -34,16 +37,11 @@ for (const [index, tab] of optionTabs.entries()) {
   });
 }
 function tell(message, error = false) { notice.textContent = message; notice.classList.toggle('error', error); notice.hidden = false; }
-try {
-  const saved = localStorage.getItem(storageKey);
-  if (saved) setup = validateSetup(JSON.parse(saved));
-} catch { tell('The saved browser setup could not be read. Started with the sample army; you can load a saved setup file.', true); }
-
 for (const art of catalog) {
   const card = document.createElement('article'); card.className = 'art-card'; card.dataset.art = art.id; card.dataset.faction = art.faction; card.dataset.era = art.era;
   card.innerHTML = `<div class="art-preview"><img src="${art.path}" alt="${art.name}${art.kind === 'Mounted' ? ' in side profile' : ''}" loading="lazy"></div><div class="card-body"><h3>${art.name}</h3><p>${art.note}</p><div class="quantity"><label for="qty-${art.id}">Bases</label><button data-delta="-1" aria-label="Remove one ${art.name} base">−</button><input id="qty-${art.id}" type="number" min="0" max="50" step="1" aria-label="${art.name} bases"><button data-delta="1" aria-label="Add one ${art.name} base">+</button></div></div>`;
   for (const button of card.querySelectorAll('[data-delta]')) button.addEventListener('click', () => {
-    const input = card.querySelector('input'); input.value = Math.max(0, Math.min(50, (Number(input.value) || 0) + Number(button.dataset.delta))); requestRender();
+    const input = card.querySelector('input'); input.value = Math.max(0, Math.min(50, (Number(input.value) || 0) + Number(button.dataset.delta))); requestRender(true);
   });
   card.querySelector('input').addEventListener('input', requestRender);
   const options = unitTypeOptions(art);
@@ -100,6 +98,7 @@ function readControls() {
     for (const [i, input] of [...$(`copy-names-${art.id}`).querySelectorAll('input')].entries()) copies[i] = input.value;
     value.copyNames[art.id] = copies;
   }
+  if (project.mode === 'roster' && project.mapping.showBadges) value.labelPlacement = project.paper.labelPlacement;
   return validateSetup(value);
 }
 function counts() {
@@ -115,20 +114,25 @@ function counts() {
       button.title = setup.groundColorMode === 'faction' ? `${button.dataset.filter}: ${palette.name} (${palette.color})` : `Setup ground color (${setup.groundColor})`;
     }
   }
-  const total = Object.values(setup.quantities).reduce((a, b) => a + b, 0);
+  const total = project.mode === 'roster' ? project.army.units.length + project.army.heroes.length : Object.values(setup.quantities).reduce((a, b) => a + b, 0);
   $('base-count').textContent = `${total} ${total === 1 ? 'base' : 'bases'}`;
   for (const art of catalog) document.querySelector(`[data-art="${art.id}"]`).classList.toggle('selected', setup.quantities[art.id] > 0);
   $('ground-value').textContent = setup.groundColor; $('figure-value').textContent = setup.figureColor;
   $('silhouette-value').textContent = setup.silhouetteColor;
-  $('label-placement').disabled = !setup.nameplates && !setup.factionSymbols;
-  $('number-bases').disabled = !setup.nameplates;
+  const badges = project.mode === 'roster' && project.mapping.showBadges;
+  $('label-placement').disabled = badges || (!setup.nameplates && !setup.factionSymbols);
+  if (badges) $('label-placement').value = 'rear';
+  $('number-bases').disabled = project.mode === 'roster' || !setup.nameplates;
   $('figure-color').disabled = setup.figureBackground !== 'solid';
   $('gradient-bottom').disabled = $('gradient-top').disabled = setup.figureBackground !== 'gradient';
   $('silhouette-color').disabled = setup.reverse !== 'silhouette';
 }
 
 function diagram() {
-  const infantry = makeStrip(catalog.find(art => art.id === 'gondor-swords'), setup), cavalry = makeStrip(catalog.find(art => art.id === 'gondor-horse'), setup);
+  const badge = project.mode === 'roster' && project.mapping.showBadges;
+  const diagramSetup = badge ? {...setup, labelPlacement: 'rear'} : setup;
+  const infantry = makeStrip(catalog.find(art => art.id === 'gondor-swords'), diagramSetup, 1, {badge});
+  const cavalry = makeStrip(catalog.find(art => art.id === 'gondor-horse'), diagramSetup, 1, {badge});
   const ground = groundColorFor(catalog.find(art => art.id === 'gondor-swords'), setup);
   const svg = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 245" role="img" aria-label="Infantry folds parallel to the 40 millimetre frontage; cavalry folds parallel to the selected base depth. Flat feet between doubled upright panels."><g font-family="system-ui,sans-serif" fill="#344035">`];
   for (const [i, strip] of [infantry, cavalry].entries()) {
@@ -145,7 +149,7 @@ function diagram() {
   }
   svg.push('<text x="25" y="206" font-size="9">Flat feet + doubled upright panels (edge view)</text><path d="M25 233 H60 V213 H63 V233 H108 V213 H111 V233 H150" fill="none" stroke="#294d3d" stroke-width="2"/><line x1="25" y1="236" x2="150" y2="236" stroke="#9caa7c" stroke-width="3"/><text x="180" y="230" font-size="9">Fold at the crest; glue faces back-to-back.</text></g></svg>');
   $('fold-diagram').innerHTML = svg.join('');
-  $('fold-description').textContent = `${infantry.unitType}: ${infantry.width} × ${+infantry.height.toFixed(2)} mm unfolded, ${+infantry.pitch.toFixed(2)} mm between ranks. ${cavalry.unitType}: ${cavalry.width} × ${+cavalry.height.toFixed(2)} mm unfolded, ${+cavalry.pitch.toFixed(2)} mm between riders. Flat feet total 20 mm for infantry and 40 mm for cavalry.${infantry.rearDepth ? ' Rear ground band reserves 7 mm and adds two ground-colored 10 mm wrap tongues (3 mm down the base edge, 7 mm underneath). Foot ranks move forward. Trim cavalry at the purple lines only after doubling its upright panels; preserve every ground foot. Its separate rear label spans the assembled base, then folds 3 mm down the rear edge with a 7 mm tongue underneath. The front tongue carries a small label; cavalry prints a separate front wrap label.' : ''}${setup.nameplates && setup.labelPlacement === 'attached' ? ' Wraparound tabs add 10 mm at both infantry ends, or 10 mm on both sides of each cavalry ground section. Fold 3 mm down the base edge and tape the remaining 7 mm underneath. Cavalry also prints separate front/back name wraps.' : ''}`;
+  $('fold-description').textContent = `${infantry.unitType}: ${infantry.width} × ${+infantry.height.toFixed(2)} mm unfolded, ${+infantry.pitch.toFixed(2)} mm between ranks. ${cavalry.unitType}: ${cavalry.width} × ${+cavalry.height.toFixed(2)} mm unfolded, ${+cavalry.pitch.toFixed(2)} mm between riders. Flat feet total 20 mm for infantry and 40 mm for cavalry.${infantry.rearDepth ? ' Rear ground band reserves 7 mm and adds two ground-colored 10 mm wrap tongues (3 mm down the base edge, 7 mm underneath). Foot ranks move forward. Trim cavalry at the purple lines only after doubling its upright panels; preserve every ground foot. Its separate rear label spans the assembled base, then folds 3 mm down the rear edge with a 7 mm tongue underneath. The front tongue carries a small label; cavalry prints a separate front wrap label.' : ''}${setup.nameplates && diagramSetup.labelPlacement === 'attached' ? ' Wraparound tabs add 10 mm at both infantry ends, or 10 mm on both sides of each cavalry ground section. Fold 3 mm down the base edge and tape the remaining 7 mm underneath. Cavalry also prints separate front/back name wraps.' : ''}`;
 }
 
 $('assembly').innerHTML = '<li>Print the PDF on one side of the paper at <strong>100% / actual size</strong>. Measure the 40 mm rule before cutting.</li><li>Score the dashed and dotted lines, then cut each complete net along its solid outline. In wraparound mode, keep the cavalry side tabs connected to the ground sections; cut the notches beside the figure panels. Keep the connecting ground sections intact.</li><li>Mountain-fold each dashed crest, bringing the unprinted backs of the paired figure panels together. Glue those backs to form a doubled upright.</li><li>For rear ground band cavalry, bend the ground feet clear after gluing each upright pair. Trim the purple rear margins from the doubled upright panels down to the feet. Leave every ground foot intact. Do this before gluing the feet to the base.</li><li>Valley-fold the dotted lines at the feet. Glue the undersides of the colored ground sections to your matching base (40 × 20 mm Foot; selected 40 × 20, 40 × 30 or 40 × 40 mm Cavalry and Monstrosities; 20 × 20 mm Heroes), with the colored faces showing.</li><li>Infantry ranks run across the 40 mm frontage. Cavalry profiles run along the selected base depth, side by side across the frontage. Keep rectangular figure panels in separate and wraparound modes. Rear ground band cavalry uses the purple trimming instructions above.</li><li>For wraparound tabs, mountain-fold at the base edge and again 3 mm farther out, then tape the remaining 7 mm underneath. Infantry names sit on the 3 mm front/rear edge bands. Cavalry side tabs wrap down and underneath; its front name strip has a 3 mm name band between 3 mm top and underside flaps. Its back name strip has a 3 mm name band with a 7 mm tongue below it: fold the tongue underneath, with no top flap. For rear ground band, fold the plain ground-colored end tongues 3 mm down the base edges and tape the remaining 7 mm underneath. Foot identification is already on its rear ground and front tongue; cavalry gets one full-width rear ground label and one front wrap label. Glue the rear label across the rear ground, then fold its lower extension 3 mm down the rear edge and tape the remaining 7 mm underneath. Fold the front wrap at both guides and tape its flaps to the top and underside of the front base edge. For separate labels, cut the nameplates (38 × 4 mm units; 18 × 4 mm heroes) and glue each to its matching base. Captions identify the artwork and base number.</li>';
@@ -161,22 +165,27 @@ function showPage() {
   else $('sheet').innerHTML = '<div class="empty">Choose at least one base<br>to build your print sheet.</div>';
 }
 
-function requestRender() {
+function requestRender(event) {
   clearTimeout(timer); const id = ++revision;
   $('download').disabled = true; currentLayout = null;
   try {
-    setup = readControls(); syncCopyControls(); counts(); diagram();
-    try { localStorage.setItem(storageKey, JSON.stringify(setup)); } catch { tell('Browser storage is unavailable. Use Save setup to keep your settings.'); }
+    if (event) {
+      setup = readControls();
+      editProject(p => { p.paper = setup; }, 'controls');
+    }
+    syncCopyControls(); counts(); diagram();
+    $('save').disabled = false;
     status('Updating the print layout…');
     timer = setTimeout(() => render(id), 120);
   } catch (error) {
+    $('save').disabled = true;
     status(error.message, true); $('sheet').innerHTML = '<div class="empty">Correct the settings to preview and export.</div>';
     $('page-number').textContent = 'No preview'; $('previous').disabled = $('next').disabled = true;
   }
 }
 async function render(id) {
   try {
-    const layout = layoutSetup(setup), assets = await prepareArtwork(layout);
+    const layout = layoutSetup(setup, project.mode === 'roster' ? rosterBases(project) : undefined), assets = await prepareArtwork(layout);
     if (id !== revision) return;
     currentLayout = layout; currentAssets = assets; showPage();
     status(layout.total ? `${layout.total} bases · ${layout.pages.length} ${layout.pages.length === 1 ? 'sheet' : 'sheets'} · ${layout.setup.paper === 'a4' ? 'A4' : 'US Letter'} · 600 dpi artwork` : 'Add a base to get started.');
@@ -231,13 +240,8 @@ function download(blob, filename) {
   a.href = url; a.download = filename; document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }
-$('save').addEventListener('click', () => {
-  try { const valid = readControls(); download(new Blob([JSON.stringify(valid, null, 2) + '\n'], {type: 'application/json'}), 'uprights-setup.json'); tell('Setup saved, including names and colors.'); }
-  catch (error) { tell(error.message, true); }
-});
-$('load').addEventListener('click', () => $('load-file').click());
 $('clear').addEventListener('click', () => {
-  if (!window.confirm('Clear setup? This removes all selected bases and custom unit and base names. Fold, color, and paper settings are kept. This cannot be undone.')) return;
+  if (!window.confirm('Clear setup? This removes all selected bases and custom unit and base names. Fold, color, and paper settings are kept. Use Undo to restore them.')) return;
   setup.quantities = Object.fromEntries(catalog.map(art => [art.id, 0]));
   setup.names = {}; setup.copyNames = {};
   // Preserve the other controls, including any edits awaiting a valid render.
@@ -246,17 +250,7 @@ $('clear').addEventListener('click', () => {
     $(`name-${art.id}`).value = '';
     $(`copy-names-${art.id}`).replaceChildren();
   }
-  pageIndex = 0; requestRender(); tell('Setup cleared.');
-});
-$('load-file').addEventListener('change', async () => {
-  const file = $('load-file').files[0]; if (!file) return;
-  try {
-    if (file.size > 100_000) throw Error('Setup files must be under 100 KB.');
-    const next = validateSetup(JSON.parse(await file.text()));
-    // Do not replace the current setup unless parsing and validation succeeded.
-    setup = next; writeControls(); pageIndex = 0; requestRender(); tell(`Loaded ${file.name}.`);
-  } catch (error) { tell(`Could not load setup: ${error.message}`, true); }
-  finally { $('load-file').value = ''; }
+  pageIndex = 0; requestRender(true); tell('Setup cleared.');
 });
 $('download').addEventListener('click', async () => {
   if (!currentLayout || exporting) return;
@@ -264,11 +258,26 @@ $('download').addEventListener('click', async () => {
   exporting = true; $('download').disabled = true;
   try {
     const bytes = await createPDF(layout, assets, (page, total) => { if (revision === id) status(`Building PDF: page ${page} of ${total}…`); });
-    download(new Blob([bytes], {type: 'application/pdf'}), 'uprights-print.pdf');
+    download(new Blob([bytes], {type: 'application/pdf'}), 'army-standees.pdf');
     tell(`PDF ready: ${layout.total} bases on ${layout.pages.length} ${layout.pages.length === 1 ? 'sheet' : 'sheets'}. Print at actual size / 100%.`);
     if (revision === id) status(`${layout.total} bases · ${layout.pages.length} sheets · PDF ready`);
   } catch (error) { tell(`PDF export failed: ${error.message}`, true); }
   finally { exporting = false; $('download').disabled = !currentLayout?.pages.length; }
 });
 
-writeControls(); requestRender();
+export function renderView() {
+  setup = structuredClone(project.paper);
+  pageIndex = 0;
+  const roster = project.mode === 'roster';
+  $('manual-catalog').hidden = roster;
+  $('clear').hidden = roster;
+  $('mapping').hidden = !roster;
+  $('paper-heading').textContent = roster ? project.army.name : 'Manual standees';
+  $('paper-help').textContent = roster ? 'Assign artwork to your force and preview the cutting sheets.' : 'Choose units, set their folds, and print at actual size.';
+  if (roster) renderMapping();
+  writeControls();
+  requestRender();
+}
+changes.addEventListener('change', event => {
+  if (event.detail === 'mapping' && !$('paper-view').hidden) renderView();
+});

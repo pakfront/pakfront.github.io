@@ -1,0 +1,145 @@
+{
+  "format": "midgard-army-project",
+  "version": 1,
+  "mode": "roster",
+  "army": {
+    "id": "2410c5e7-7dda-41fc-8f08-07d9ecf06137",
+    "name": "The defence of Osgiliath",
+    "notes": "",
+    "target": 300,
+    "settings": {
+      "columns": "two",
+      "paper": "Letter"
+    },
+    "contingents": [
+      {
+        "id": "31c6542a-d9da-4dbf-b14e-d766c18941b1",
+        "name": "The city guard"
+      },
+      {
+        "id": "9f1d94a8-d515-4cc0-88ba-4cdebc49fd09",
+        "name": "The river reserve"
+      }
+    ],
+    "types": [
+      {
+        "role": "Warriors",
+        "combat": 12,
+        "shooting": 0,
+        "armour": [
+          3
+        ],
+        "stamina": 4,
+        "reputation": 2,
+        "points": 20,
+        "traits": [
+          "Brittle"
+        ],
+        "equipment": "",
+        "notes": "",
+        "id": "6d68936a-e6fd-4ec0-855f-e75285d32ae7",
+        "name": "Gondor Spears",
+        "nextNumber": 7,
+        "standard": {
+          "profile": "Heavy Infantry",
+          "options": [],
+          "traits": [
+            "Brittle"
+          ]
+        }
+      }
+    ],
+    "units": [
+      {
+        "id": "fa0201f7-b99b-42ae-88a9-ab1c2365a715",
+        "typeId": "6d68936a-e6fd-4ec0-855f-e75285d32ae7",
+        "contingentId": "31c6542a-d9da-4dbf-b14e-d766c18941b1",
+        "number": 1,
+        "name": "Gondor Spears 1"
+      },
+      {
+        "id": "eaf36bb5-9a07-4e16-91a2-bece1e22c12c",
+        "typeId": "6d68936a-e6fd-4ec0-855f-e75285d32ae7",
+        "contingentId": "31c6542a-d9da-4dbf-b14e-d766c18941b1",
+        "number": 2,
+        "name": "Gondor Spears 2"
+      },
+      {
+        "id": "92b7f773-376d-4e97-bc9d-122507da41ef",
+        "typeId": "6d68936a-e6fd-4ec0-855f-e75285d32ae7",
+        "contingentId": "31c6542a-d9da-4dbf-b14e-d766c18941b1",
+        "number": 3,
+        "name": "Gondor Spears 3"
+      },
+      {
+        "id": "11465953-9de3-4f32-8d02-22488f3e26c1",
+        "typeId": "6d68936a-e6fd-4ec0-855f-e75285d32ae7",
+        "contingentId": "31c6542a-d9da-4dbf-b14e-d766c18941b1",
+        "number": 4,
+        "name": "Gondor Spears 4"
+      },
+      {
+        "id": "aac4bfa3-7ccd-4abe-8e17-4bdb5adea242",
+        "typeId": "6d68936a-e6fd-4ec0-855f-e75285d32ae7",
+        "contingentId": "9f1d94a8-d515-4cc0-88ba-4cdebc49fd09",
+        "number": 5,
+        "name": "Gondor Spears 5"
+      },
+      {
+        "id": "198a11e8-1747-4a11-ba62-fba8adead500",
+        "typeId": "6d68936a-e6fd-4ec0-855f-e75285d32ae7",
+        "contingentId": "9f1d94a8-d515-4cc0-88ba-4cdebc49fd09",
+        "number": 6,
+        "name": "Gondor Spears 6"
+      }
+    ],
+    "heroes": [
+      {
+        "level": 3,
+        "combat": 3,
+        "shooting": 0,
+        "armour": [
+          4
+        ],
+        "stamina": 2,
+        "points": 27,
+        "reputation": 4,
+        "equipment": "",
+        "traits": [
+          "Army Commander"
+        ],
+        "notes": "",
+        "id": "3dc95cf3-f11d-4421-90ff-fbf4a52fab5f",
+        "name": "Captain of the White Tower",
+        "contingentId": "31c6542a-d9da-4dbf-b14e-d766c18941b1"
+      }
+    ]
+  },
+  "paper": {
+    "version": 1,
+    "ranks": 2,
+    "riders": 4,
+    "reverse": "silhouette",
+    "infantryHeight": 14.5,
+    "mountedHeight": 21,
+    "groundColor": "#b6bc91",
+    "figureColor": "#ffffff",
+    "paper": "a4",
+    "orientation": "portrait",
+    "margin": 10,
+    "gap": 4,
+    "guides": true,
+    "quantities": {},
+    "nameplates": true
+  },
+  "mapping": {
+    "art": {},
+    "overrides": {},
+    "roles": {},
+    "labels": {
+      "3dc95cf3-f11d-4421-90ff-fbf4a52fab5f": "Captain"
+    },
+    "badges": {},
+    "showBadges": true
+  }
+}

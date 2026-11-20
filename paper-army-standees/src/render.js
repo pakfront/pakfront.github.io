@@ -137,7 +137,7 @@ function fittedRearLabel(item, setup) {
     candidates.push([item.name.slice(0, i), item.name.slice(i + 1)]);
   // Reserve matching space on the right of Hero names when they can still fit.
   // Fall back to the wider, asymmetric text area for long names.
-  const rightInsets = item.art.hero && symbol ? [inset, 0] : [0];
+  const rightInsets = item.badge ? [4.6] : item.art.hero && symbol ? [inset, 0] : [0];
   for (const rightInset of rightInsets) for (const lines of candidates) {
     try {
       const available = item.width - inset - rightInset;
@@ -149,7 +149,7 @@ function fittedRearLabel(item, setup) {
 }
 
 export async function prepareArtwork(layout) {
-  if (layout.setup.nameplates) {
+  if (layout.setup.nameplates || layout.pages.some(page => page.some(item => item.entryId))) {
     await prepareLabelFont();
     for (const item of layout.pages.flat()) {
       if (item.kind === 'nameplate') {
@@ -219,6 +219,13 @@ export function pageScene(layout, index) {
     if (fit.symbol) ops.push(...symbolPolygons({symbol: fit.symbol, size: fit.symbolSize, rotation: 0},
       bx + (item.art.hero && !item.name ? (bw - fit.symbolSize) / 2 : .6),
       by + (bh - fit.symbolSize) / 2, contrast(color), color));
+    if (item.badge) {
+      const size = 3.4, left = bx + bw - size - .6, top = by + (bh - size) / 2;
+      const points = item.badge.shape === 'triangle' ? [[.5,0],[1,1],[0,1]]
+        : item.badge.shape === 'diamond' ? [[.5,0],[1,.5],[.5,1],[0,.5]] : [[0,0],[1,0],[1,1],[0,1]];
+      rect(left - .2, top - .2, size + .4, size + .4, contrast(item.badge.color));
+      ops.push({type: 'polygon', points: points.map(([px,py]) => [left + px * size, top + py * size]), fill: item.badge.color});
+    }
     fit.lines.forEach((value, i) => {
       const textWidth = labelFont.widthOfTextAtSize(value, fit.size * 72 / 25.4) / (72 / 25.4);
       text(value, bx + fit.inset + (bw - fit.inset - (fit.rightInset || 0) - textWidth) / 2,
@@ -229,7 +236,13 @@ export function pageScene(layout, index) {
   for (const strip of layout.pages[index]) {
     const groundColor = groundColorFor(strip.art, setup);
     const {x: netX, y, sections} = strip, x = netX + (strip.bodyX || 0), w = strip.bodyWidth ?? strip.width;
-    text(`${strip.art.shortName || strip.art.name} ${strip.copy}${strip.kind === 'nameplate' ? strip.wrap ? ' / ' + strip.edge + ' label' : ' / label' : ''}`, netX, strip.captionY, w === 20 ? 1.7 : 2);
+    let caption = `${strip.art.shortName || strip.art.name} ${strip.copy}${strip.kind === 'nameplate' ? strip.wrap ? ' / ' + strip.edge + ' label' : ' / label' : ''}`;
+    const captionSize = w === 20 ? 1.7 : 2;
+    if (strip.entryId) {
+      caption = '#' + strip.copy + ' ' + strip.label.replace(/[^\x20-\x7e\xa0-\xff€‘’“”–—…]/gu, '?');
+      while (labelFont.widthOfTextAtSize(caption, captionSize) > w - 1) caption = caption.slice(0, -1);
+    }
+    text(caption, netX, strip.captionY, captionSize);
     if (strip.kind === 'nameplate' && strip.rearGround) {
       rect(x, y, w, strip.height, groundColor);
       rearLabel(strip, x, y, w, strip.labelHeight, groundColor);

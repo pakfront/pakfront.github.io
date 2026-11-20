@@ -104,7 +104,7 @@ export function baseLabel(art, setup, copy = 1) {
 
 // The unfolded strip is: half foot, [front, back, full foot]..., half foot.
 // Each pair doubles back at its crest; only flat feet contribute to the base span.
-export function makeStrip(art, setup, copy = 1) {
+export function makeStrip(art, setup, copy = 1, base = {}) {
   const mounted = art.kind === 'Mounted';
   const baseWidth = art.baseWidth ?? 40;
   const baseDepth = art.hero ? (art.baseDepth ?? 20)
@@ -112,12 +112,12 @@ export function makeStrip(art, setup, copy = 1) {
     : art.kind === 'Monster' ? (setup.monstrosityBaseDepth ?? 20) : (art.baseDepth ?? 20);
   const width = mounted ? baseDepth : baseWidth, span = mounted ? baseWidth : baseDepth;
   const unitType = art.hero ? 'Hero' : art.kind === 'Monster' ? 'Monstrosities'
-    : setup.unitTypes?.[art.id] ?? unitTypeOptions(art)[0];
+    : base.role ?? setup.unitTypes?.[art.id] ?? unitTypeOptions(art)[0];
   const count = art.uprightCount ?? (art.hero ? 1 : mounted
     ? unitType === 'Light Riders' ? (setup.lightRiders ?? 3) : setup.riders
     : unitType === 'Skirmishers' ? (setup.skirmisherRanks ?? 1) : setup.ranks);
   const panelHeight = art.panelHeight ?? (mounted ? setup.mountedHeight : setup.infantryHeight);
-  const rear = setup.labelPlacement === 'rear' && (setup.nameplates || setup.factionSymbols);
+  const rear = setup.labelPlacement === 'rear' && (setup.nameplates || setup.factionSymbols || base.badge);
   const rearDepth = rear ? 7 : 0;
   const firstFoot = rear && !mounted ? (count === 1 ? (span - rearDepth) / 2 : 3) : span / count / 2;
   const pitch = rear && !mounted && count > 1 ? (span - rearDepth - firstFoot) / (count - 1) : span / count;
@@ -134,11 +134,11 @@ export function makeStrip(art, setup, copy = 1) {
     folds.push({y, kind: 'valley'});
     add('ground', rank === count - 1 ? lastFoot : pitch);
   }
-  const strip = {art, copy, name: art.name, unitType, baseWidth, baseDepth, width, height: y, bodyWidth: width, bodyHeight: y, count, span, panelHeight, pitch, sections, folds};
+  const strip = {...base, art, copy, name: art.name, unitType, baseWidth, baseDepth, width, height: y, bodyWidth: width, bodyHeight: y, count, span, panelHeight, pitch, sections, folds};
   strip.uprightPositions = Array.from({length: count}, (_, i) => firstFoot + i * pitch);
   if (rear) {
     strip.rearDepth = rearDepth;
-    strip.labelName = setup.nameplates ? baseLabel(art, setup, copy) : '';
+    strip.labelName = setup.nameplates ? base.label ?? baseLabel(art, setup, copy) : '';
     if (!mounted) {
       const last = sections.at(-1);
       strip.rearBand = {x: 0, y: last.y + last.height - rearDepth, width, height: rearDepth};
@@ -148,7 +148,7 @@ export function makeStrip(art, setup, copy = 1) {
     }
   }
   if (rear || (setup.nameplates && setup.labelPlacement === 'attached')) {
-    if (!rear) strip.labelName = baseLabel(art, setup, copy);
+    if (!rear) strip.labelName = base.label ?? baseLabel(art, setup, copy);
     strip.bodyY = 10;
     strip.bodyX = 0;
     // Broad end tongues wrap over the base edges along the strip's main axis.
@@ -160,26 +160,27 @@ export function makeStrip(art, setup, copy = 1) {
   return strip;
 }
 
-export function layoutSetup(setup) {
+export function layoutSetup(setup, bases) {
   setup = validateSetup(setup);
-  const items = catalog.flatMap(art => Array.from({length: setup.quantities[art.id]}, (_, i) => makeStrip(art, setup, i + 1)));
+  if (bases?.some(base => base.badge)) setup.labelPlacement = 'rear';
+  const items = bases ? bases.map(base => makeStrip(base.art, setup, base.copy, base)) : catalog.flatMap(art => Array.from({length: setup.quantities[art.id]}, (_, i) => makeStrip(art, setup, i + 1)));
   const labels = items.flatMap(strip => {
     if (strip.rearDepth) {
       if (strip.art.kind !== 'Mounted') return [];
-      const rearLabel = {kind: 'nameplate', rearGround: true, art: strip.art,
-        copy: strip.copy, name: strip.labelName, width: strip.baseWidth, labelHeight: strip.rearDepth,
+      const rearLabel = {kind: 'nameplate', rearGround: true, badge: strip.badge, art: strip.art,
+        entryId: strip.entryId, label: strip.label, copy: strip.copy, name: strip.labelName, width: strip.baseWidth, labelHeight: strip.rearDepth,
         height: strip.rearDepth + 10, sections: []};
       return setup.nameplates ? [rearLabel, {kind: 'nameplate', wrap: true, edge: 'front', art: strip.art,
-        copy: strip.copy, name: strip.labelName, width: strip.baseWidth, height: 9, sections: []}] : [rearLabel];
+        entryId: strip.entryId, label: strip.label, copy: strip.copy, name: strip.labelName, width: strip.baseWidth, height: 9, sections: []}] : [rearLabel];
     }
     if (!setup.nameplates) return [];
-    const name = baseLabel(strip.art, setup, strip.copy);
+    const name = strip.label ?? baseLabel(strip.art, setup, strip.copy);
     if (setup.labelPlacement === 'attached') {
       if (strip.art.kind !== 'Mounted') return [];
-      return ['front', 'back'].map(edge => ({kind: 'nameplate', wrap: true, edge, art: strip.art, copy: strip.copy,
+      return ['front', 'back'].map(edge => ({kind: 'nameplate', wrap: true, edge, art: strip.art, entryId: strip.entryId, label: strip.label, copy: strip.copy,
         name, width: strip.baseWidth, height: edge === 'back' ? 10 : 9, sections: []}));
     }
-    return [{kind: 'nameplate', art: strip.art, copy: strip.copy, name, width: strip.baseWidth - 2, height: 4, sections: []}];
+    return [{kind: 'nameplate', art: strip.art, entryId: strip.entryId, label: strip.label, copy: strip.copy, name, width: strip.baseWidth - 2, height: 4, sections: []}];
   });
   return {...pack([...items, ...labels], setup), setup, total: items.length,
     labelTotal: setup.nameplates ? items.length * (['attached', 'rear'].includes(setup.labelPlacement) ? 2 : 1) : 0};
