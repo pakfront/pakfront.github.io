@@ -12,6 +12,6 @@ Calculate combat modifiers for Great Campaigns of the American Civil War, with a
 
 Manage battlefield truth and commander views, then export player maps. A desktop umpire tool, currently early stage development.
 
-### [Paper Army Standees](paper-army-standees/)
+### [Midgard Army Workshop](midgard-army-workshop/)
 
-Create printable standees for Midgard Heroic Battles and other tabletop games.
+Build a Midgard Heroic Battles roster and print matching paper miniatures, or choose standees directly from the historical and Middle-earth catalogs.

@@ -31,7 +31,12 @@ const eagle = [polygon([[5,.6],[6.3,2.2],[5.8,3.4],[9.5,1.6],[8.8,5],[6.2,5.8],[
 const tower = [polygon([[1,9],[1,7.7],[2,7.7],[2,1],[3.5,1],[3.5,2.5],[4.3,2.5],[4.3,1],[5.7,1],[5.7,2.5],[6.5,2.5],[6.5,1],[8,1],[8,7.7],[9,7.7],[9,9]]),
   polygon([[4,9],[4,6],[5,5.4],[6,6],[6,9]], true)];
 
+const rose = [polygon([[5,.5],[6.5,1],[7,2.8],[8.8,2.7],[9.7,4],[9.3,5.6],[7.8,6.3],
+  [8.1,8],[7,9.2],[5.5,9],[5,8.1],[4,9],[2.6,9.1],[1.6,8],[2,6.2],[.6,5.4],[.4,3.9],
+  [1.5,2.7],[3.1,2.8],[3.5,1]]), polygon([[5,3.8],[6.3,4.8],[5.8,6.2],[4.2,6.2],[3.7,4.8]], true)];
+
 export const factionSymbols = {
+  'wars-of-the-roses': {English: {name: 'Rose', shapes: rose}},
   'middle-earth-third-age': {
     Gondor: {name: 'Tree', shapes: tree}, Rohan: {name: 'Horse head', shapes: horse},
     Mordor: {name: 'Eye', shapes: eye}, Isengard: {name: 'Hand', shapes: hand},

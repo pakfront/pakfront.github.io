@@ -2,6 +2,7 @@ export const eras = [
   {id: 'middle-earth-third-age', name: 'Middle-earth · Third Age'},
   {id: 'american-civil-war', name: 'American Civil War'},
   {id: 'napoleonic', name: 'Napoleonic Wars'},
+  {id: 'wars-of-the-roses', name: 'Wars of the Roses'},
 ];
 
 // Colors only need to be distinct among factions in the same era.
@@ -23,6 +24,7 @@ export const factionGroundColors = {
     French: {color: '#315d91', name: 'Imperial blue'},
     Spanish: {color: '#c49a36', name: 'Ochre gold'},
   },
+  'wars-of-the-roses': {English: {color: '#923e41', name: 'Madder red'}},
 };
 
 export function groundColorFor(art, setup) {
@@ -107,6 +109,16 @@ export const catalog = [
   {id: 'acw-usa-leader', name: 'USA General', era: 'american-civil-war', faction: 'USA', kind: 'Mounted', hero: true, baseWidth: 20, baseDepth: 20, file: 'usa-leader-profile.png', note: 'Mounted leader · one upright · 20 × 20 mm'},
   {id: 'napoleonic-french-line', name: 'French Line', era: 'napoleonic', faction: 'French', kind: 'Infantry', height: 13.5, file: 'french-line-infantry.png', note: 'Clean print style · eight line infantry · blue coats and shakos · 40 × 20 mm'},
   {id: 'napoleonic-spanish-line', name: 'Spanish Line', era: 'napoleonic', faction: 'Spanish', kind: 'Infantry', height: 13.5, file: 'spanish-line-infantry.png', note: 'Clean print style · eight line infantry · white coats and bicornes · 40 × 20 mm'},
+  {id: 'wotr-sallet-knight', name: 'Sallet Knights', era: 'wars-of-the-roses', faction: 'English', kind: 'Mounted', height: 20, file: 'sallet-knight-profile.png', note: 'Mounted knights in visored sallets · 40 × 20 mm'},
+  {id: 'wotr-armet-knight', name: 'Armet Knights', era: 'wars-of-the-roses', faction: 'English', kind: 'Mounted', height: 20, file: 'armet-knight-profile.png', note: 'Mounted knights in armets · 40 × 20 mm'},
+  {id: 'wotr-men-at-arms', name: 'Men-at-Arms', era: 'wars-of-the-roses', faction: 'English', kind: 'Infantry', height: 13.5, file: 'men-at-arms.png', note: 'Eight pollaxemen in barbutes and kettle hats · 40 × 20 mm'},
+  {id: 'wotr-billmen', name: 'Billmen', era: 'wars-of-the-roses', faction: 'English', kind: 'Infantry', height: 13.5, file: 'billmen.png', note: 'Eight billmen in kettle hats · 40 × 20 mm'},
+  {id: 'wotr-sallet-lancer', name: 'Sallet Lancers', era: 'wars-of-the-roses', faction: 'English', kind: 'Mounted', height: 20, file: 'sallet-lancer-profile.png', note: 'Mounted knight with raised lance · 40 × 20 mm'},
+  {id: 'wotr-sallet-foot-knights', name: 'Sallet Foot Knights', era: 'wars-of-the-roses', faction: 'English', kind: 'Infantry', height: 13.5, file: 'sallet-foot-knights.png', note: 'Eight dismounted knights with swords · 40 × 20 mm'},
+  {id: 'wotr-armet-lancer', name: 'Armet Lancers', era: 'wars-of-the-roses', faction: 'English', kind: 'Mounted', height: 20, file: 'armet-lancer-profile.png', note: 'Mounted knight with raised lance · 40 × 20 mm'},
+  {id: 'wotr-armet-foot-knights', name: 'Armet Foot Knights', era: 'wars-of-the-roses', faction: 'English', kind: 'Infantry', height: 13.5, file: 'armet-foot-knights.png', note: 'Eight dismounted knights with swords · 40 × 20 mm'},
+  {id: 'wotr-longbowmen', name: 'Longbowmen', era: 'wars-of-the-roses', faction: 'English', kind: 'Infantry', height: 13.5, file: 'longbowmen.png', note: 'Eight archers with tall wooden longbows · 40 × 20 mm'},
+  {id: 'wotr-crossbowmen', name: 'Crossbowmen', era: 'wars-of-the-roses', faction: 'English', kind: 'Infantry', height: 13.5, file: 'crossbowmen.png', note: 'Eight crossbowmen with belt bolt cases · 40 × 20 mm'},
 ].map(art => {
   const limit = art.hero ? HERO_NAME_LIMIT : DEFAULT_NAME_LIMIT;
   if (art.name.length > limit) throw Error(`${art.id}: default name exceeds ${limit} characters.`);
